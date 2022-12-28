@@ -45,11 +45,16 @@ def manage_incoming(message, *a,**kw):
 water.ManageIncoming = manage_incoming
 
 def sendMessage(payload=None,_number="972547932000@c.us", message="fresh grass", *a,**kw):
+	print(":::!!!!!!!send::::::::::::::")
+	print(payload)
+	print(":::::::::::::::::")
 	number = payload["number"] if payload else _number
 	message = payload["message"] if payload else message
-
-	water._driver.sendText(number, message)
-	print(f" Sending MEssage ::: {a} {kw} \n", payload, "\n")
+	if "_driver" in water:
+		water._driver.sendText(number, message)
+		print(f" Sending MEssage ::: {a} {kw} \n", payload, "\n")
+	else:
+		print(" ::: Driver not connected yet :::")
 
 
 water.sendMessage = sendMessage
