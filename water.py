@@ -95,6 +95,20 @@ def manage_incoming(message, *a,**kw):
 
 water.ManageIncoming = manage_incoming
 
+def manage_polls(data,*a,**kw):
+	print("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP")
+	print("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP")
+	print("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP")
+	print(":::::::::::::::::", a)
+	pp(data)
+	print(":::::::::::::::::", kw)
+	print("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP")
+	print("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP")
+	print("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP")
+	
+
+water.ManagePolls = manage_polls
+
 
 def sendMessage(_message="fresh grass", _number="972547932000@c.us", *a, **kw):
 	if "_xo" in kw:
@@ -162,6 +176,7 @@ def main():
 	# water._driver.onMessage(printResponse)
 	# water._driver.onMessage(water.ManageIncoming)
 	water._driver.onAnyMessage(water.ManageIncoming)
+	water._driver.onPollVote(water.ManagePolls)
 
 	# Executing commands
 	water._driver.sendText(number, "fresh waters!!!!!!")
