@@ -17,6 +17,8 @@ import os
 # Wa Automate Docs: 
 # https: // openwa.dev/docs/api/classes/api_Client.Client
 import time
+from tokenize import group
+import traceback
 from rich.prompt import Prompt
 from wa_automate_socket_client import SocketClient
 from xo.redis import xoRedis, xo 
@@ -34,19 +36,75 @@ host, port = "localhost", 8085
 defaultNumber = "972547932000@c.us"
 def manage_incoming(message, *a,**kw):
 	print(":::::::::::::::::")
-	print(message,a,kw)
+	if message:
+		print(message["data"]["chat"]["id"],a,kw)
+		print(":::::::::::::::::")
+		print(message)
 	print(":::::::::::::::::")
 	if message:
-		print(f" incoming ::: {a} {kw} \n", message["data"]["sender"], "\n", message["data"]["body"], "\n")
-		response = "ECHO!\n" + message["data"]["body"]
-		water.message = {"number": defaultNumber , "message": response}
+		body = "________________________empty body________________________"
+		if "data" in message and "body" in message["data"]:
+			body = message["data"]["body"]
+
+
+		origin = message["data"]["chat"]["id"]
+		print(f" incoming ::: {a} {kw} \n", message["data"]["sender"]["id"], origin, "\n",body, "\n")
+		useEcho = True
+		
+		response = "ECHO!\n" +body
+		if message["data"]["sender"]["isMe"]:
+			# print(" ::: message from me :::")
+			response += "\n\n ::: message from me :::"
+			if "ECHO" in body:
+				print(" ::: ACK ECHO :::")
+			elif body.startswith("/group"):
+				groupName = "......"
+				groupName = body.split("/group")[1].strip()
+				res = " ::: creating new group group :::"+ groupName
+				# water.sendMessage(_message=res, _number=defaultNumber)
+				# final = water._driver.createGroup(groupName, ["972543610404@c.us"])
+				final = water.createGroup(groupName, ["972543610404@c.us"])
+				water.sendMessage(_message=f"GROUP CREATED {final}", _number=defaultNumber)
+			else:
+				if useEcho:
+					
+					if "g.us" in origin:
+						print("iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
+						water._driver.setGroupTitle(origin, body + "TTTTTTTTT")
+						poll = water._driver.sendPoll(origin, "How do you like this service?", [
+	                       "good", "great!", "niiccce"])
+						
+						print("iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii",poll)
+						print("iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
+						print("iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
+					else:
+						print("XXXXXXXXXXXXXXXXXXXXXXXXX")
+					time.sleep(1)
+					water.sendMessage(_message=response, _number=origin)
+		else:
+		# water.sendMessage(_message=response, _number=message["data"]["sender"]["id"])
+			print("33333333333333333")
+			if useEcho:
+				water.sendMessage(_message=response, _number=defaultNumber)
 
 
 water.ManageIncoming = manage_incoming
 
 
 def sendMessage(_message="fresh grass", _number="972547932000@c.us", *a, **kw):
-	_message = kw["_xo"].value
+	if "_xo" in kw:
+		_message = kw["_xo"].value
+	if isinstance(_message, dict):
+		_number, _message = _message["number"], _message["message"]
+	elif isinstance(_message, list):
+		if len(_message) == 1:
+			_message = _message[0]
+			if isinstance(_message, str):
+				_message = _message
+			else:
+				_number, _message = _message["number"], _message["message"]
+		elif len(_message) == 2:
+			_message, _number,  = _message
 	print(":::!!!!!!!send::::::::::::::", _message, _number)
 	payload = None
 	# print(payload)
@@ -97,7 +155,8 @@ def main():
 
 	# Listening for events
 	# water._driver.onMessage(printResponse)
-	water._driver.onMessage(water.ManageIncoming)
+	# water._driver.onMessage(water.ManageIncoming)
+	water._driver.onAnyMessage(water.ManageIncoming)
 
 	# Executing commands
 	water._driver.sendText(number, "fresh waters!!!!!!")
@@ -113,7 +172,123 @@ def main():
 	# client.disconnect()
 
 
+water._groups = {}
+water._apps = {"Google": {"name": " GOOGLE", "icon_url": "",
+                           "description": "Google Search", "invite_link": ""}}
 
+
+# @Simple
+def setGroupApp(group_id, app, *args, **kwargs):
+	if "_driver" not in water:
+		print(" setGroupApp ::: Driver not connected yet :::")
+		return False
+
+	if group_id not in water._groups:
+		water._groups[group_id] = {}
+	# if app not in water._apps:
+	# 	water._apps[app] = {}
+
+	water._groups[group_id]["app"] = app
+
+	# Change group name to app name
+	water._driver.setGroupTitle(group_id, water._apps[app]["name"])
+	# water._driver.setGroupIconByUrl(water._groups[group]["id"], water._apps[app]["icon_url"])
+	# water._driver.setGroupDescription(group_id, water._apps[app]["description"])
+	print("@@@@@@@@@@@@@@@@@@ setGroupApp: ",
+	      group_id, water._apps[app]["name"], water._apps[app]["description"])
+	return True
+
+
+# @Simple
+def createGroup(Name=" ::: Test ::: ", participants=["972543610404@c.us"], *args, **kwargs):
+	print("Creating group: ,,,,,,,,")
+	if "_driver" not in water:
+		print(" ::: Driver not connected yet :::")
+		return False
+	res = water._driver.createGroup(Name, participants)
+	print("Created group: ", res)
+	time.sleep(1)
+	# res2 = "FAILED"
+	# try:
+	# 	res2 = water._driver.removeParticipant(
+	# 		res["wid"]["_serialized"], participants[0])
+	# except:
+	# 	print(" ::: remove_participant failed :::")
+	# 	traceback.print_exc()
+		
+	# print("removed participant: ", res2)
+	print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
+	print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
+	print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
+	print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
+	try:
+		res["invite_link"] = water._driver.getGroupInviteLink(
+			res["wid"]["_serialized"])
+	except:
+		print(" ::: invite_link failed :::")
+		traceback.print_exc()
+
+	print("invite link: ", res["invite_link"])
+	try:
+		res["info"] = water._driver.inviteInfo(res["invite_link"])
+	except:
+		print(" ::: inviteInfo failed :::")
+		traceback.print_exc()
+		
+	print("info : ", res["info"])
+	# time.sleep(3)
+	print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+	print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+	print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", res["info"]["groupMetadata"]["id"])
+	# water._driver.sendMessage("WELCOME!",res["wid"]["_serialized"])
+	water.sendMessage("WELCOME!",res["info"]["groupMetadata"]["id"])
+	print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+	print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+	print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+	# water._driver.sendMessage("WELCOME!", "120363029005529843@g.us")
+	print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+	print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+	print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+	water._driver.sendPoll(res["wid"]["_serialized"], "How do you like this service?",["good", "great!", "niiccce"])
+	print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+	print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+	print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+
+	water._driver.setGroupTitle(res["wid"]["_serialized"], "XXXXXXXXXXXXXXX")
+
+	print("invite link: ", res["invite_link"])
+	print("invite link: ", res["invite_link"])
+	print("invite link: ", res["invite_link"])
+	print("invite link: ", res["invite_link"])
+	return res
+water.createGroup = createGroup
+
+# @Simple
+def listGroups(search="*", *args, **kwargs):
+	if "_driver" not in water:
+		print(" ::: Driver not connected yet :::")
+		return False
+	res = water._driver.getAllGroups()
+	final = {}
+	for group in res:
+		if search is "*" or search in group["name"]:
+			print("group: ", group)
+
+			print()
+			final[group["id"]] = {"name": group["name"], "id": group["id"],
+                         "participants": group["groupMetadata"]["participants"],
+                         "full_data": group, }
+			if "desc" in group["groupMetadata"]:
+				final[group["id"]]["desc"] = group["groupMetadata"]["desc"]
+			# getGroupInviteLink(group["id"])
+			# final[group["id"]] = group
+		# elif search in group["name"]:
+		# 	final[group["id"]] = group
+
+	for key in final:
+		print("key: ", key, " group: ", final[key]["name"], final[key]["id"])
+	# print("list groups: ", final)
+	return {"groups": final}
 
 # wa setup in readme
 # wa api docs
@@ -151,7 +326,7 @@ def main():
 # water._driver = openwa.driver
 
 # Create lambda functions for each method in the whatsapp driver
-water.newGroup @= lambda payload, *a,**kw : water.createGroup(payload)
+water.newGroup @= lambda payload, *a,**kw : water.createGroup(payload, *a,**kw)
 water.message @= lambda payload, *a,**kw : water.sendMessage(payload, *a,**kw)
 water.newLink @= lambda payload, *a,**kw : water.createLink(payload)
 water.silence @= lambda payload, *a,**kw : water.silenceGroup(payload)

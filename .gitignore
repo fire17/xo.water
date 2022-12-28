@@ -110,3 +110,5 @@ _IGNORE_session/
 **.node-persist**
 **_IGNORE_**
 # end managed by open-wa
+
+_IGNORE_session/
