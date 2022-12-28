@@ -1,0 +1,5 @@
+wa-automate-socket-client==1.1.0
+dill==0.3.6
+zeroless
+killport
+rich
