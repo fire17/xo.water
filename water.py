@@ -44,13 +44,33 @@ def manage_incoming(message, *a,**kw):
 
 water.ManageIncoming = manage_incoming
 
-def sendMessage(payload=None,_number="972547932000@c.us", message="fresh grass", *a,**kw):
-	print(":::!!!!!!!send::::::::::::::")
-	print(payload)
-	print(":::::::::::::::::")
+
+def sendMessage(_message="fresh grass", _number="972547932000@c.us", *a, **kw):
+	_message = kw["_xo"].value
+	print(":::!!!!!!!send::::::::::::::", _message, _number)
+	payload = None
+	# print(payload)
+	# if isinstance(payload, list):
+	# 	if len(payload) == 1:
+	# 		payload = payload[0]
+	# 		if isinstance(payload, str):
+	# 			_message = payload
+	# 		else:
+	# 			_number, _message = payload["number"], payload["message"]
+	# 	elif len(payload) == 2:
+	# 		_number, _message = payload
+	# 	payload = None
+	# elif isinstance(payload, str):
+	# 	_message = payload
+	# 	payload = None
+			
+	print(":::::::::::::::::", payload, _number, _message)
 	number = payload["number"] if payload else _number
-	message = payload["message"] if payload else message
+	message = payload["message"] if payload else _message
+	print(":::!!!!!!!send::::::::::::::", message, number)
 	if "_driver" in water:
+		print(
+		    f" Sending MEssage..... {number} {message} ::: {a} {kw} \n", payload, "\n")
 		water._driver.sendText(number, message)
 		print(f" Sending MEssage ::: {a} {kw} \n", payload, "\n")
 	else:
@@ -59,8 +79,9 @@ def sendMessage(payload=None,_number="972547932000@c.us", message="fresh grass",
 
 water.sendMessage = sendMessage
 
-
-if __name__ == "__main__":
+_client = None
+	
+def main():
 
 	# These are available:
 	# water.logs.info('::: Starting simple Service on port')
@@ -70,6 +91,7 @@ if __name__ == "__main__":
 	# secure = "secure_api_key"
 	_client = SocketClient(f'http://{host}:{port}/', wa_key)
 	water._driver = _client
+	print("!!!!!!!!!!!!!!!!!","_driver" in water, water._driver)
 	def printResponse(message):
 		print(" incoming :::\n", message["data"]["body"],"\n")
 
@@ -78,7 +100,7 @@ if __name__ == "__main__":
 	water._driver.onMessage(water.ManageIncoming)
 
 	# Executing commands
-	water._driver.sendText(number, "fresh waters")
+	water._driver.sendText(number, "fresh waters!!!!!!")
 
 	# Sync/Async support
 	print(" ::: CONNECTED! ", water._driver.getHostNumber())  # Sync request
@@ -266,3 +288,5 @@ water.getPortal @= lambda payload, *a,**kw : water.Get.Portal(payload)
 # water.newLocation = lambda payload, *a,**kw : water.sendLocation(payload)
 # water.newSticker = lambda payload, *a,**kw : water.sendSticker(payload)
 
+if __name__ == "__main__":
+	main()
