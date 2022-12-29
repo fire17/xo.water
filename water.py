@@ -37,10 +37,32 @@ host, port = "localhost", 8085
 defaultNumber = "972547932000@c.us"
 def manage_incoming(message, *a,**kw):
 	print(":::::::::::::::::")
+	data = {}
 	if message:
 		print(message["data"]["chat"]["id"],a,kw)
 		print(":::::::::::::::::")
 		pp(message)
+		data["origin"] = message["data"]["chatId"]
+		data["sender"] = message["data"]["from"]
+		data["type"] = message["data"]["type"] # "chat" or "poll_creation" or 
+		if "chat" in data["type"]:
+			data["content"] = message["data"]["content"]
+		data["id"] = message["data"]["id"] 
+
+		if "ptt" in data["type"].lower() or "audio" in data["type"]:
+			print("PPPPPTTTTTTTTTT")
+			print("PPPPPTTTTTTTTTT")
+			print("PPPPPTTTTTTTTTT")
+			print("PPPPPTTTTTTTTTT")
+			print("PPPPPTTTTTTTTTT")
+			print("PPPPPTTTTTTTTTT")
+			print("PPPPPTTTTTTTTTT")
+			print("PPPPPTTTTTTTTTT")
+			print("PPPPPTTTTTTTTTT")
+
+			# for k in message:
+			# 	print(k," ::: ", message[k])
+			# mContent = AnalyzeAudio(message, factored= factored)
 	print(":::::::::::::::::")
 	if message:
 		body = "________________________empty body________________________"
