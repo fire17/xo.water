@@ -1,6 +1,13 @@
 #xo.water.py
 
 
+from gtts import gTTS
+from pydub import AudioSegment
+import shazi
+# from munch import Munch
+
+import speech_recognition as sr
+recognizer = sr.Recognizer()
 
 import os
 
@@ -35,87 +42,7 @@ host, port = "localhost", 8085
 # from dal.utilities.rename_process import set_proc_name
 # set_proc_name(b'simple')
 defaultNumber = "972547932000@c.us"
-def manage_incoming(message, *a,**kw):
-	print(":::::::::::::::::")
-	data = {}
-	if message:
-		print(message["data"]["chat"]["id"],a,kw)
-		print(":::::::::::::::::")
-		pp(message)
-		data["origin"] = message["data"]["chatId"]
-		data["sender"] = message["data"]["from"]
-		data["type"] = message["data"]["type"] # "chat" or "poll_creation" or 
-		if "chat" in data["type"]:
-			data["content"] = message["data"]["content"]
-		data["id"] = message["data"]["id"] 
 
-		if "ptt" in data["type"].lower() or "audio" in data["type"]:
-			print("PPPPPTTTTTTTTTT")
-			print("PPPPPTTTTTTTTTT")
-			print("PPPPPTTTTTTTTTT")
-			print("PPPPPTTTTTTTTTT")
-			print("PPPPPTTTTTTTTTT")
-			print("PPPPPTTTTTTTTTT")
-			print("PPPPPTTTTTTTTTT")
-			print("PPPPPTTTTTTTTTT")
-			print("PPPPPTTTTTTTTTT")
-
-			# for k in message:
-			# 	print(k," ::: ", message[k])
-			# mContent = AnalyzeAudio(message, factored= factored)
-	print(":::::::::::::::::")
-	if message:
-		body = "________________________empty body________________________"
-		if "data" in message and "body" in message["data"]:
-			body = message["data"]["body"]
-
-
-		origin = message["data"]["chat"]["id"]
-		print(f" incoming ::: {a} {kw} \n", message["data"]["sender"]["id"], origin, "\n",body, "\n")
-		useEcho = True
-		
-		response = "ECHO!\n" +body
-		if message["data"]["sender"]["isMe"]:
-			# print(" ::: message from me :::")
-			response += "\n\n ::: message from me :::"
-			if "ECHO" in body:
-				print(" ::: ACK ECHO :::")
-			elif body.startswith("/poll"):
-				poll = water._driver.sendPoll(origin, "How do you like this service?", [
-					"good", "great!", "niiccce"])
-				
-			elif body.startswith("/group"):
-				groupName = "......"
-				groupName = body.split("/group")[1].strip()
-				res = " ::: creating new group group :::"+ groupName
-				# water.sendMessage(_message=res, _number=defaultNumber)
-				# final = water._driver.createGroup(groupName, ["972543610404@c.us"])
-				final = water.createGroup(groupName, ["972543610404@c.us"])
-				water.sendMessage(_message=f"GROUP CREATED {final}", _number=defaultNumber)
-			else:
-				if useEcho:
-					
-					if "g.us" in origin:
-						print("iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
-						water._driver.setGroupTitle(origin, body + "TTTTTTTTT")
-						# poll = water._driver.sendPoll(origin, "How do you like this service?", [
-	                    #    "good", "great!", "niiccce"])
-						
-						# print("iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii",poll)
-						print("iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
-						print("iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
-					else:
-						print("XXXXXXXXXXXXXXXXXXXXXXXXX")
-					time.sleep(1)
-					water.sendMessage(_message=response, _number=origin)
-		else:
-		# water.sendMessage(_message=response, _number=message["data"]["sender"]["id"])
-			print("33333333333333333")
-			if useEcho:
-				water.sendMessage(_message=response, _number=defaultNumber)
-
-
-water.ManageIncoming = manage_incoming
 
 def manage_polls(data,*a,**kw):
 	print("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP")
@@ -497,16 +424,8 @@ water.getPortal @= lambda payload, *a,**kw : water.Get.Portal(payload)
 
 
 
-from pydub import AudioSegment
-import shazi
-# from munch import Munch
 
-import speech_recognition as sr
-recognizer = sr.Recognizer()
-from gtts import gTTS
-
-
-def Process(self, contact, factored=False):
+def Process(contact, factored=False):
 
 	if not factored:
 		message = Munch(contact)
@@ -955,72 +874,152 @@ def Process(self, contact, factored=False):
 							if foundService is None:
 								self.driver.sendMessage(chatID, target+" : is not recognized as a service "+target)
 
-	def AnalyzeAudioFile(self, path, defLanguage = 'iw-IL'):
-		text = ""
+def AnalyzeAudioFile(self, path, defLanguage = 'iw-IL'):
+	text = ""
+	try:
+		# audio.export(path, format="wav")
+		''' speech to '''
+		# notSent = False
+		with sr.AudioFile(path) as source:
+			rec = recognizer.record(source)
+			text = recognizer.recognize_google(rec)
+			# self.sendMessage(message.chat_id, "Got from Speech:\n*"+text+"*")
+	except:
+		traceback.print_exc()
+		# notSent = True
+	return text
+	
+def AnalyzeAudio(message, factored = False):
+	if message is None:
+		return None
+	shortRec = 3.5
+	text = ""
+	try:
+		# LAST[0] = message
+		# LAST["o"] = {}
+		if factored:
+			jobj = message.get_js_obj()
+		else:
+			jobj = message
+		self.sendMessage(message.chat_id, "_Analyzing Audio Please Wait..._")
+		jobj["clientUrl"] = jobj["deprecatedMms3Url"]
+		ptt = self.driver.download_media(jobj)
+		audio = AudioSegment.from_file(ptt)
+		length = len(audio)
+		# audio = AudioSegment.from_file(ptt)
+		# path = "rec.wav"
+		path = "recs/"+message.chat_id.split("@")[0]+"_rec"+".wav"
+		# if True:
+		audio.export(path, format="wav")
+		''' speech to '''
+
+		notSent = False
 		try:
-			# audio.export(path, format="wav")
-			''' speech to '''
-			# notSent = False
 			with sr.AudioFile(path) as source:
 				rec = recognizer.record(source)
-				text = recognizer.recognize_google(rec)
-				# self.sendMessage(message.chat_id, "Got from Speech:\n*"+text+"*")
+
+				text = recognizer.recognize_google(rec, language = 'iw-IL')
+				self.sendMessage(message.chat_id, "Got from Speech:\n*"+text+"*")
 		except:
 			traceback.print_exc()
-			# notSent = True
-		return text
-	def AnalyzeAudio(self, message, factored = False):
-		if message is None:
-			return None
-		shortRec = 3.5
-		text = ""
-		try:
-			LAST[0] = message
-			LAST["o"] = {}
-			if factored:
-				jobj = message.get_js_obj()
+			notSent = True
+
+		shazamLimit = 22
+		if length > shortRec * 1000:
+			''' shazam '''
+			o = shazi.shazam(path)
+			tx = time.time()
+			while "title" not in o and time.time()-tx < shazamLimit:
+				time.sleep(1)
+			self.sendMessage(message.chat_id, "Got from Shazam:\n*"+str(o["title"]+" - "+o["artist"])+"*")
+			text = str(o["title"]+" - "+o["artist"])
+	except:
+		traceback.print_exc()
+	return text
+
+
+def manage_incoming(message, *a, **kw):
+	print(":::::::::::::::::")
+	data = {}
+	if message:
+		print(message["data"]["chat"]["id"], a, kw)
+		print(":::::::::::::::::")
+		pp(message)
+		data["origin"] = message["data"]["chatId"]
+		data["sender"] = message["data"]["from"]
+		data["type"] = message["data"]["type"]  # "chat" or "poll_creation" or
+		if "chat" in data["type"]:
+			data["content"] = message["data"]["content"]
+		data["id"] = message["data"]["id"]
+
+		if "ptt" in data["type"].lower() or "audio" in data["type"]:
+			print("PPPPPTTTTTTTTTT")
+			print("PPPPPTTTTTTTTTT")
+			print("PPPPPTTTTTTTTTT")
+			print("PPPPPTTTTTTTTTT")
+			print("PPPPPTTTTTTTTTT")
+			print("PPPPPTTTTTTTTTT")
+			print("PPPPPTTTTTTTTTT")
+			print("PPPPPTTTTTTTTTT")
+			print("PPPPPTTTTTTTTTT")
+
+			# for k in message:
+			# 	print(k," ::: ", message[k])
+			mContent = AnalyzeAudio(message)#, factored=factored)
+	print(":::::::::::::::::")
+	if message:
+		body = "________________________empty body________________________"
+		if "data" in message and "body" in message["data"]:
+			body = message["data"]["body"]
+
+		origin = message["data"]["chat"]["id"]
+		print(f" incoming ::: {a} {kw} \n",
+		      message["data"]["sender"]["id"], origin, "\n", body, "\n")
+		useEcho = True
+		useEcho = False
+
+		response = "ECHO!\n" + body
+		if message["data"]["sender"]["isMe"] and origin == defaultNumber:
+			# print(" ::: message from me :::")
+			response += "\n\n ::: message from me :::"
+			if "ECHO" in body:
+				print(" ::: ACK ECHO :::")
+			elif body.startswith("/poll"):
+				poll = water._driver.sendPoll(origin, "How do you like this service?", [
+					"good", "great!", "niiccce"])
+
+			elif body.startswith("/group"):
+				groupName = "......"
+				groupName = body.split("/group")[1].strip()
+				res = " ::: creating new group group :::" + groupName
+				# water.sendMessage(_message=res, _number=defaultNumber)
+				# final = water._driver.createGroup(groupName, ["972543610404@c.us"])
+				final = water.createGroup(groupName, ["972543610404@c.us"])
+				water.sendMessage(_message=f"GROUP CREATED {final}", _number=defaultNumber)
 			else:
-				jobj = message
-			self.sendMessage(message.chat_id, "_Analyzing Audio Please Wait..._")
-			jobj["clientUrl"] = jobj["deprecatedMms3Url"]
-			ptt = self.driver.download_media(jobj)
-			audio = AudioSegment.from_file(ptt)
-			length = len(audio)
-			# audio = AudioSegment.from_file(ptt)
-			# path = "rec.wav"
-			path = "recs/"+message.chat_id.split("@")[0]+"_rec"+".wav"
-			# if True:
-			audio.export(path, format="wav")
-			''' speech to '''
+				if useEcho:
 
-			notSent = False
-			try:
-				with sr.AudioFile(path) as source:
-					rec = recognizer.record(source)
+					if "g.us" in origin:
+						print("iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
+						water._driver.setGroupTitle(origin, body + "TTTTTTTTT")
+						# poll = water._driver.sendPoll(origin, "How do you like this service?", [
+	                    #    "good", "great!", "niiccce"])
 
-					text = recognizer.recognize_google(rec, language = 'iw-IL')
-					self.sendMessage(message.chat_id, "Got from Speech:\n*"+text+"*")
-			except:
-				traceback.print_exc()
-				notSent = True
-
-			shazamLimit = 22
-			if length > shortRec * 1000:
-				''' shazam '''
-				o = shazi.shazam(path)
-				tx = time.time()
-				while "title" not in o and time.time()-tx < shazamLimit:
+						# print("iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii",poll)
+						print("iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
+						print("iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
+					else:
+						print("XXXXXXXXXXXXXXXXXXXXXXXXX")
 					time.sleep(1)
-				self.sendMessage(message.chat_id, "Got from Shazam:\n*"+str(o["title"]+" - "+o["artist"])+"*")
-				text = str(o["title"]+" - "+o["artist"])
-		except:
-			traceback.print_exc()
-		return text
+					water.sendMessage(_message=response, _number=origin)
+		else:
+        		# water.sendMessage(_message=response, _number=message["data"]["sender"]["id"])
+			print("33333333333333333")
+			if useEcho:
+				water.sendMessage(_message=response, _number=defaultNumber)
 
 
-
-
-
+water.ManageIncoming = manage_incoming
 # water.newContact = lambda payload, *a,**kw : water.addContact(payload)
 # water.newMedia = lambda payload, *a,**kw : water.sendMedia(payload)
 # water.newLocation = lambda payload, *a,**kw : water.sendLocation(payload)

@@ -6,12 +6,11 @@
     "configurations": [
         
         {
-            "name": "Python: water",
+            "name": "Python: Attach",
             "type": "python",
-            "request": "launch",
-            "program": "water.py",
-            "console": "integratedTerminal",
-            "justMyCode": true
+            "request": "attach",
+            "port": 1111,
+            "host": "localhost"
         }
     ]
 }
