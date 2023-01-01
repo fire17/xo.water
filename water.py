@@ -23,20 +23,40 @@ import os
 ######################################    imports and setup    ####################################################
 # Wa Automate Docs: 
 # https: // openwa.dev/docs/api/classes/api_Client.Client
+
 import time
 from tokenize import group
 import traceback
 from rich.prompt import Prompt
 from wa_automate_socket_client import SocketClient
 from xo.redis import xoRedis, xo 
+import json
 
 water = xoRedis('water')
 
 from pprint import pprint as pp
 
 def getEnvKey(key="WA_KEY"):
-    return os.environ.get(key, "Please export the WA_KEY environment variable.")
+	return os.environ.get(key, "Please export the WA_KEY environment variable.")
 wa_key = getEnvKey()
+
+if not os.path.exists("secrets.json"):
+	print("Please set up the secrets file before running the script.")
+	print("""{
+  "WA_KEY": "your_wa_key"
+}""")
+else:
+	with open("secrets.json", "r") as f:
+		secrets = json.load(f)
+		# Update the environment with the values in the JSON file
+		os.environ.update(secrets)
+		# Your script code goes here
+		# You can access the environment variables using the os.environ dictionary
+		wa_key = os.environ["WA_KEY"]
+		print(" ::: Loaded secrets from secrets.json ::: WA_KEY=", wa_key)
+
+# sys.exit(1)
+
 host, port = "localhost", 8085
 # from common import *
 # from dal.utilities.rename_process import set_proc_name
@@ -96,7 +116,7 @@ def sendMessage(_message="fresh grass", _number="972547932000@c.us", *a, **kw):
 	print(":::!!!!!!!send::::::::::::::", message, number)
 	if "_driver" in water:
 		print(
-		    f" Sending MEssage..... {number} {message} ::: {a} {kw} \n", payload, "\n")
+			f" Sending MEssage..... {number} {message} ::: {a} {kw} \n", payload, "\n")
 		water._driver.sendText(number, message)
 		print(f" Sending MEssage ::: {a} {kw} \n", payload, "\n")
 	else:
@@ -143,7 +163,7 @@ def main():
 
 water._groups = {}
 water._apps = {"Google": {"name": " GOOGLE", "icon_url": "",
-                           "description": "Google Search", "invite_link": ""}}
+						   "description": "Google Search", "invite_link": ""}}
 
 
 # @Simple
@@ -164,7 +184,7 @@ def setGroupApp(group_id, app, *args, **kwargs):
 	# water._driver.setGroupIconByUrl(water._groups[group]["id"], water._apps[app]["icon_url"])
 	# water._driver.setGroupDescription(group_id, water._apps[app]["description"])
 	print("@@@@@@@@@@@@@@@@@@ setGroupApp: ",
-	      group_id, water._apps[app]["name"], water._apps[app]["description"])
+		  group_id, water._apps[app]["name"], water._apps[app]["description"])
 	return True
 
 
@@ -245,8 +265,8 @@ def listGroups(search="*", *args, **kwargs):
 
 			print()
 			final[group["id"]] = {"name": group["name"], "id": group["id"],
-                         "participants": group["groupMetadata"]["participants"],
-                         "full_data": group, }
+						 "participants": group["groupMetadata"]["participants"],
+						 "full_data": group, }
 			if "desc" in group["groupMetadata"]:
 				final[group["id"]]["desc"] = group["groupMetadata"]["desc"]
 			# getGroupInviteLink(group["id"])
@@ -999,7 +1019,7 @@ def manage_incoming(message, *a, **kw):
 
 		origin = message["data"]["chat"]["id"]
 		print(f" incoming ::: {a} {kw} \n",
-		      message["data"]["sender"]["id"], origin, "\n", body, "\n")
+			  message["data"]["sender"]["id"], origin, "\n", body, "\n")
 		useEcho = True
 		useEcho = False
 
@@ -1028,7 +1048,7 @@ def manage_incoming(message, *a, **kw):
 						print("iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
 						water._driver.setGroupTitle(origin, body + "TTTTTTTTT")
 						# poll = water._driver.sendPoll(origin, "How do you like this service?", [
-	                    #    "good", "great!", "niiccce"])
+						#    "good", "great!", "niiccce"])
 
 						# print("iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii",poll)
 						print("iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
@@ -1038,7 +1058,7 @@ def manage_incoming(message, *a, **kw):
 					time.sleep(1)
 					water.sendMessage(_message=response, _number=origin)
 		else:
-        		# water.sendMessage(_message=response, _number=message["data"]["sender"]["id"])
+				# water.sendMessage(_message=response, _number=message["data"]["sender"]["id"])
 			print("33333333333333333")
 			if useEcho:
 				water.sendMessage(_message=response, _number=defaultNumber)

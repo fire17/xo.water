@@ -113,3 +113,4 @@ _IGNORE_session/
 
 _IGNORE_session/
 secrets.sh
+secrets.json
