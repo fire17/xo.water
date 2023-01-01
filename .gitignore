@@ -112,3 +112,4 @@ _IGNORE_session/
 # end managed by open-wa
 
 _IGNORE_session/
+secrets.sh
