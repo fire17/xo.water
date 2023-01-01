@@ -40,13 +40,13 @@ def getEnvKey(key="WA_KEY"):
 	return os.environ.get(key, "Please export the WA_KEY environment variable.")
 wa_key = getEnvKey()
 
-if not os.path.exists("secrets.json"):
+if not os.path.exists("./secrets.json"):
 	print("Please set up the secrets file before running the script.")
 	print("""{
   "WA_KEY": "your_wa_key"
 }""")
 else:
-	with open("secrets.json", "r") as f:
+	with open("./secrets.json", "r") as f:
 		secrets = json.load(f)
 		# Update the environment with the values in the JSON file
 		os.environ.update(secrets)
