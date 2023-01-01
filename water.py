@@ -43,6 +43,7 @@ def getEnvKey(key="WA_KEY"):
 	return os.environ.get(key, "Please export the WA_KEY environment variable.")
 wa_key = getEnvKey()
 
+
 if not os.path.exists(f"{cwd}/secrets.json"):
 	print("Please set up the secrets file before running the script.")
 	print("""{
