@@ -38,7 +38,7 @@ class someService():
 	def __init__(self, api:WaterAPI,*args,**kwargs):
 		self._api = api
 		
-	def on_incoming(self.*args, **kwargs):
+	def on_incoming(self, *args, **kwargs):
 		# handle logic for new information
 		pass 
 	def on_init_group(self, *args, **kwargs):
