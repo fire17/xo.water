@@ -1,50 +1,33 @@
 {
     "artificialDelayMilliseconds": 200,
-    "keepExistingTerminalsOpen": true,
-    "runOnStartup": false,
+    "keepExistingTerminalsOpen": false,
+    "runOnStartup": true,
     "terminals": [
         {
             "splitTerminals": [
                 {
-                    "name": "server",
+                    "name": "redis",
                     "commands": [
-                        "npm i",
-                        "npm run dev"
+                        "redis-server"
                     ]
                 },
                 {
-                    "name": "client",
+                    "name": "openwa client",
                     "commands": [
-                        "npm run dev:client"
+                        "source secrets.sh",
+                        "npx @open-wa/wa-automate --socket -p 8085 -k $WA_KEY --license-key $WA_KEY --message-preprocessor 'AUTO_DECRYPT_SAVE'"
                     ]
                 },
                 {
-                    "name": "test",
+                    "name": "water server",
                     "commands": [
-                        "jest --watch"
-                    ]
-                }
-            ]
-        },
-        {
-            "splitTerminals": [
-                {
-                    "name": "build & e2e",
-                    "commands": [
-                        "eslint --ext .tsx --ext .ts lib/",
-                        "npm run build",
-                        "npm run e2e"
-                    ],
-                    "shouldRunCommands": false
-                },
-                {
-                    "name": "worker",
-                    "commands": [
-                        "npm-run-all --parallel redis tsc-watch-start worker"
+                        "source secrets.sh",
+                        "python3 -m debugpy --listen 1111 water.py"
                     ]
                 }
             ]
         }
+       
     ]
 }
 

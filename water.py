@@ -29,7 +29,7 @@ from tokenize import group
 import traceback
 from rich.prompt import Prompt
 from wa_automate_socket_client import SocketClient
-from xo.redis import xoRedis, xo 
+from xo.redis import xoRedis, xo , Expando
 import json
 import os
 cwd = os.path.dirname(os.path.abspath(__file__))
@@ -130,12 +130,62 @@ def sendMessage(_message="fresh grass", _number="972547932000@c.us", *a, **kw):
 water.sendMessage = sendMessage
 
 _client = None
+
+class flow(Expando):
+	
+	def load(**kw):
+		pass
+	def addStep(**kw):
+		pass
+	def newResponse(*a,**kw):
+		pass 
+	def nextPhase():
+		pass 
+	def runFlow(**kw):
+		pass
+
+
+
+# water.newContact = lambda payload, *a,**kw : water.addContact(payload)
+# water.newMedia = lambda payload, *a,**kw : water.sendMedia(payload)
+# water.newLocation = lambda payload, *a,**kw : water.sendLocation(payload)
+# water.newSticker = lambda payload, *a,**kw : water.sendSticker(payload)
+from services.googler import Googler
+from services.api import *
+# from services.warmWinters import WarmWinters
+
+# water.services.warmWinters = WarmWinters()
+
+def setGroupToService(group, service):
+	if service in water.services:
+		print(f" ::: SETTING GROUP {group} to service {service}")
+		water.groups[group].service = service
+		water.services[service].groups[group]
+
+		water.sendMessage(f" ::: Changing Group {group} to service {service.name} :::",group)
+		water._driver.setGroupTitle(group, service.title)
+		water._driver.setGroupIconFromUrl(group, service.iconURL)
+	else:
+		print(f" --- Service {service} is not loaded in water ---")
+
+
+def loadServices(water):	
+	# water.services.googler.api = WaterAPI()
+	# water.services.googler = Googler()
+	for service in [Googler,]:
+		api = WaterAPI()
+		api.service = service
+		water.services[service.name].api = api
+		water.services[service.name]._service = service(api)
+
+
+
 	
 def main():
 
 	# These are available:
 	# water.logs.info('::: Starting simple Service on port')
-
+	loadServices(water)
 	number = '972547932000@c.us'
 	# secure = "0B2FDC9C-FADF48A9-92E5F3D1-D2CDA55A"
 	# secure = "secure_api_key"
@@ -208,6 +258,8 @@ def createGroup(Name=" ::: Test ::: ", participants=["972543610404@c.us"], *args
 	# except:
 	# 	print(" ::: remove_participant failed :::")
 	# 	traceback.print_exc()
+	# water._driver.setGroupTitle(res["wid"]["_serialized"], "XXXXXXXXXXXXXXX")
+	water._driver.setGroupTitle(res["wid"]["_serialized"], " ::: "+Name.upper()+" ::: ")
 		
 	# print("removed participant: ", res2)
 	print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
@@ -234,7 +286,6 @@ def createGroup(Name=" ::: Test ::: ", participants=["972543610404@c.us"], *args
 	print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 	print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", res["info"]["groupMetadata"]["id"])
 	# water._driver.sendMessage("WELCOME!",res["wid"]["_serialized"])
-	water.sendMessage("WELCOME!",res["info"]["groupMetadata"]["id"])
 	print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 	print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 	print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
@@ -242,12 +293,27 @@ def createGroup(Name=" ::: Test ::: ", participants=["972543610404@c.us"], *args
 	print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 	print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 	print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-	water._driver.sendPoll(res["wid"]["_serialized"], "How do you like this service?",["good", "great!", "niiccce"])
+	if "winter" in Name:
+		# water._driver.sendImage("https://i.ibb.co/1dZj8pT/winter.jpg", res["wid"]["_serialized"], "WELCOME!")
+		water._driver.setGroupTitle(res["wid"]["_serialized"], " ::: *חורף חם* ::: ")
+		warmWintersMsg = """*חורף חם:*
+		שלום ותורה רבה שפניתם אלינו!
+		המשימה שלנו היא לוודא שאין אף אחד שקר לו החורף.
+		אם אתם או מישהו שאתם מכירים צריכים פטרון חימום , לחצו על "בקשה לחימום"
+		לכל מי שמעוניין לעזור לחצו על הכפתורים המתאימים...
+
+		תודה רבה על ההשתתפות!
+		שיהיה לכולנו *חורף חם!*"""
+		water.sendMessage(warmWintersMsg,res["info"]["groupMetadata"]["id"])
+		water._driver.sendPoll(res["wid"]["_serialized"], "*:חורף חם*",["בקשת חימום", "תרומת חימום", "עזרה במסירה", "הרשמה כעמותה/ספק"])
+
+	else:
+		water.sendMessage("WELCOME!",res["info"]["groupMetadata"]["id"])
+		water._driver.sendPoll(res["wid"]["_serialized"], "How do you like this service?",["good", "great!", "niiccce"])
 	print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 	print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 	print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 
-	water._driver.setGroupTitle(res["wid"]["_serialized"], "XXXXXXXXXXXXXXX")
 
 	print("invite link: ", res["invite_link"])
 	print("invite link: ", res["invite_link"])
@@ -325,8 +391,9 @@ water.newLink @= lambda payload, *a,**kw : water.createLink(payload)
 water.silence @= lambda payload, *a,**kw : water.silenceGroup(payload)
 water.unsilence @= lambda payload, *a,**kw : water.unsilenceGroup(payload)
 water.poll @= lambda payload, *a,**kw : water.createPoll(payload)
+# water.onMessage @= lambda payload, *a,**kw : water.ManageIncoming(payload)
+
 # water.timedMessage = lambda payload, *a,**kw : water.sendTimedMessage(payload)
-water.onMessage @= lambda payload, *a,**kw : water.ManageIncoming(payload)
 # water.onAck @= lambda payload, *a,**kw : water.onMessageAck(payload)
 # water.onParticipantsChanged @= lambda payload, *a,**kw : water.handle.onGroupParticipantsChanged(payload)
 # water.onAddedToGroup @= lambda payload, *a,**kw : water.handle.onAddedToGroup(payload)
@@ -980,15 +1047,73 @@ def AnalyzeAudio(message, factored = False):
 			tx = time.time()
 			while "title" not in o and time.time()-tx < shazamLimit:
 				time.sleep(1)
-			water._driver.sendMessage(message.chat_id, "Got from Shazam:\n*"+str(o["title"]+" - "+o["artist"])+"*")
+			# water._driver.sendMessage(message.chat_id, "Got from Shazam:\n*"+str(o["title"]+" - "+o["artist"])+"*")
+			water.sendMessage(_message= "Got from Shazam:\n*"+str(o["title"]+" - "+o["artist"])+"*", _number=defaultNumber)
+
 			text = str(o["title"]+" - "+o["artist"])
 	except:
 		traceback.print_exc()
 	return text
 
 
+def processRootCommands(message):
+	origin = message["data"]["chatId"]
+	user = message["data"]["from"]
+	msgType =  message["data"]["type"]
+	messageID = message["data"]["id"]
+	text = None
+	if "chat" in data["type"]:
+		text = message["data"]["content"]
+	# isMe = message["data"]["sender"]["isMe"]
+
+	body = text if text is not None else ""
+	if "ECHO" in body:
+		print(" ::: ACK ECHO :::", text)
+	elif body.startswith("/poll"):
+		poll = water._driver.sendPoll(origin, "How do you like this service?", [
+			"good", "great!", "niiccce"])
+
+	elif body.startswith("/group"):
+		groupName = "......"
+		groupName = body.split("/group")[1].strip()
+		res = " ::: creating new group group :::" + groupName
+		# water.sendMessage(_message=res, _number=defaultNumber)
+		# final = water._driver.createGroup(groupName, ["972543610404@c.us"])
+		final = water.createGroup(groupName, ["972543610404@c.us"])
+		# water.sendMessage(_message=f"GROUP CREATED {final}", _number=defaultNumber)
+		water.sendMessage(_message=f"GROUP CREATED {final}", _number=origin)
+		groupID = final["wid"]["_serialized"]
+		if body.split(" ") > 0:
+			setGroupToService(groupID, body.split(" ")[1])
+		inviteURL = "TODO invite url"
+		print(" ::: DONE CREATING GROUP :::", groupID, inviteURL)
+
+
 def manage_incoming(message, *a, **kw):
-	print(":::::::::::::::::")
+	origin = message["data"]["chatId"]
+	user = message["data"]["from"]
+	msgType =  message["data"]["type"]
+	messageID = message["data"]["id"]
+	text = None
+	if "chat" in data["type"]:
+		text = message["data"]["content"]
+	isMe = message["data"]["sender"]["isMe"]
+	print()
+	print("::::::::incoming :::::::::", origin, user, msgType, text, a, kw)
+	if isMe and user == origin:
+		print(f"This is the root manager isMe:{isMe}",origin)
+		processRootCommands(message)
+	elif isMe and origin in water.groups:
+		serviceName = water.groups[origin].service.value
+		print(" @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ ")
+		print(" @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ ")
+		print(f" @@@@@@@@ INCOMING MESSAGE TO SERVICE {serviceName} ")
+		print(" @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ ")
+		print(" @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ ")
+		# should pass message data to service 
+		water.sendMessage(_message=f"!!! will be handled by {serviceName} service", _number=origin)
+
+
 	data = {}
 	if message:
 		print(message["data"]["chat"]["id"], a, kw)
@@ -1032,19 +1157,7 @@ def manage_incoming(message, *a, **kw):
 			# print(" ::: message from me :::")
 			response += "\n\n ::: message from me :::"
 			if "ECHO" in body:
-				print(" ::: ACK ECHO :::")
-			elif body.startswith("/poll"):
-				poll = water._driver.sendPoll(origin, "How do you like this service?", [
-					"good", "great!", "niiccce"])
-
-			elif body.startswith("/group"):
-				groupName = "......"
-				groupName = body.split("/group")[1].strip()
-				res = " ::: creating new group group :::" + groupName
-				# water.sendMessage(_message=res, _number=defaultNumber)
-				# final = water._driver.createGroup(groupName, ["972543610404@c.us"])
-				final = water.createGroup(groupName, ["972543610404@c.us"])
-				water.sendMessage(_message=f"GROUP CREATED {final}", _number=defaultNumber)
+				print(" ::: ACK ECHO :::", text)
 			else:
 				if useEcho:
 
@@ -1069,10 +1182,27 @@ def manage_incoming(message, *a, **kw):
 
 
 water.ManageIncoming = manage_incoming
-# water.newContact = lambda payload, *a,**kw : water.addContact(payload)
-# water.newMedia = lambda payload, *a,**kw : water.sendMedia(payload)
-# water.newLocation = lambda payload, *a,**kw : water.sendLocation(payload)
-# water.newSticker = lambda payload, *a,**kw : water.sendSticker(payload)
+
+
+
+	
+
+
+
+
+# have raw ability to change icon and name
+
+# create rolling empty groups, which are accessible via rest api
+
+# create an abstract class for a service, which can be used to create a service
+# it will have a name, a description, an icon, a list of event hooks, and an api to the user (obfuscated)
+
+# water.services.warmWinters.users["master"].groups["origin_uid"]
+# water.services.warmWinters.groups["origin_uid"].users["master"]
+# water.groups["origin_uid"].service = "warmWinters"
+# water.groups["origin_uid"].service.api = water.services.warmWinters.api
+
+# water.users
 
 if __name__ == "__main__":
 	main()
