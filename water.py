@@ -97,7 +97,7 @@ def sendMessage(_message="fresh grass", _number="972547932000@c.us", *a, **kw):
 				_number, _message = _message["number"], _message["message"]
 		elif len(_message) == 2:
 			_message, _number,  = _message
-	print(":::!!!!!!!send::::::::::::::", _message, _number)
+	# print(":::!!!!!!!send::::::::::::::", _message, _number)
 	payload = None
 	# print(payload)
 	# if isinstance(payload, list):
@@ -155,16 +155,40 @@ from services.api import *
 # from services.warmWinters import WarmWinters
 
 # water.services.warmWinters = WarmWinters()
+def loadGroups():
+	groups = water.groups()
+	if groups == None:
+		water.groups = []
+		groups = water.groups()
+	for group in groups:
+		print("GGGGGGGGGGGGGGGGGGG",group)
+		water.groups[group]()
+		water.groups[group].service()
+
+
+loadGroups()
+
 
 def setGroupToService(group, service):
 	if service in water.services:
 		print(f" ::: SETTING GROUP {group} to service {service}")
+		print(f" ::: SETTING GROUP {group} to service {service}")
+		print(f" ::: SETTING GROUP {group} to service {service}")
+		print(f" ::: SETTING GROUP {group} to service {service}")
+		print(f" ::: SETTING GROUP {group} to service {service}")
+		print(f" ::: SETTING GROUP {group} to service {service}")
+		print(f" ::: SETTING GROUP {group} to service {service}")
+		print(f" ::: SETTING GROUP {group} to service {service}")
+		print(f" ::: SETTING GROUP {group} to service {service}")
+		print(f" ::: SETTING GROUP {group} to service {service}")
+		water.groups += [group]
 		water.groups[group].service = service
 		water.services[service].groups[group]
+		serviceObject: someService = water.services[service]._service
 
-		water.sendMessage(f" ::: Changing Group {group} to service {service.name} :::",group)
-		water._driver.setGroupTitle(group, service.title)
-		water._driver.setGroupIconFromUrl(group, service.iconURL)
+		water.sendMessage(f" ::: Changing Group {group} to service {service} :::",group, water.services[service]._service.title)
+		water._driver.setGroupTitle(group, serviceObject.title)
+		water._driver.setGroupIconByUrl(group, serviceObject.iconURL)
 	else:
 		print(f" --- Service {service} is not loaded in water ---")
 
@@ -1062,7 +1086,7 @@ def processRootCommands(message):
 	msgType =  message["data"]["type"]
 	messageID = message["data"]["id"]
 	text = None
-	if "chat" in data["type"]:
+	if "chat" in msgType:
 		text = message["data"]["content"]
 	# isMe = message["data"]["sender"]["isMe"]
 
@@ -1083,7 +1107,7 @@ def processRootCommands(message):
 		# water.sendMessage(_message=f"GROUP CREATED {final}", _number=defaultNumber)
 		water.sendMessage(_message=f"GROUP CREATED {final}", _number=origin)
 		groupID = final["wid"]["_serialized"]
-		if body.split(" ") > 0:
+		if len(body.split(" ")) > 0:
 			setGroupToService(groupID, body.split(" ")[1])
 		inviteURL = "TODO invite url"
 		print(" ::: DONE CREATING GROUP :::", groupID, inviteURL)
@@ -1095,7 +1119,7 @@ def manage_incoming(message, *a, **kw):
 	msgType =  message["data"]["type"]
 	messageID = message["data"]["id"]
 	text = None
-	if "chat" in data["type"]:
+	if "chat" in msgType:
 		text = message["data"]["content"]
 	isMe = message["data"]["sender"]["isMe"]
 	print()
@@ -1103,15 +1127,25 @@ def manage_incoming(message, *a, **kw):
 	if isMe and user == origin:
 		print(f"This is the root manager isMe:{isMe}",origin)
 		processRootCommands(message)
-	elif isMe and origin in water.groups:
+	elif isMe and origin in water.groups.value:
 		serviceName = water.groups[origin].service.value
 		print(" @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ ")
 		print(" @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ ")
 		print(f" @@@@@@@@ INCOMING MESSAGE TO SERVICE {serviceName} ")
 		print(" @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ ")
 		print(" @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ ")
+		
 		# should pass message data to service 
-		water.sendMessage(_message=f"!!! will be handled by {serviceName} service", _number=origin)
+		if text and not text.startswith("["):
+			water.sendMessage(_message=f"[will be handled by {serviceName} service]", _number=origin)
+			water.services[serviceName]._service.on_incoming(incomingEvent("message",message, origin, user),)
+			
+	elif isMe:
+		print("????????????????????")
+		print(">>> origin",origin)
+		for knownGroup in water.groups:
+			print(" -",knownGroup)
+		print("????????????????????")
 
 
 	data = {}

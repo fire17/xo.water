@@ -1,7 +1,12 @@
 
 class incomingEvent():
+	def __init__(self, eventType:str, data:object, origin:str, user:str, *args, **kwargs):
+		self.eventType = eventType
+		self.data = data
+		self.origin = origin
+		self.user = user
 	eventType:str
-	data:dict
+	data:object
 	origin:str
 	user:str
 
@@ -25,17 +30,20 @@ class WaterAPI():
 		print(" ::::::::: SENDING Question API ::::::::::::",question, callback , filter, filterResponse, args, kwargs)
 		
 class someService():
+	name="someService"
+	title = " ::: Some Service :::"
+	iconURL = ""
 	_api = None
 	state = {} # use xo.redis ?
 	def __init__(self, api:WaterAPI,*args,**kwargs):
 		self._api = api
 		
-	def on_incoming():
+	def on_incoming(self.*args, **kwargs):
 		# handle logic for new information
 		pass 
-	def on_init_group():
+	def on_init_group(self, *args, **kwargs):
 		# send welcome
 		pass
 
-	def live():
+	def live(self, *args, **kwargs):
 		pass 
