@@ -1245,3 +1245,78 @@ water.ManageIncoming = manage_incoming
 
 if __name__ == "__main__":
 	main()
+
+
+## small
+# [] save invite link
+# [] onParticipantAdded
+# [] onPollVote
+# [] /portal command load service
+# [] send links with auto preview
+# [] fire.io -> server integration
+
+
+
+## medium
+# [] give state/memory to services - functional programming
+# []  
+# [] run service events, init - welcome, 
+# [] make rolling groups
+# [] make links to join/service
+# [] make service api more robust and secure (one way, obfuscated users)
+# [] make service api more robust and secure (one way, obfuscated users)
+# [] send custome quote
+# [] onboarding events using xo @= 
+
+## serious
+# [] in-service purchases
+# [] stable host on server
+# [] get a nother number
+
+
+
+## vision
+#? [] make a service that can be used to create services - master tools service
+# [] partnership with open-wa
+# [] free opensource services
+# [] commisions on free hosted in-service purchases
+# [] paid master services (excluding spamming)
+# [] premium custom whatsapp service by us (no spamming allowed)
+
+
+
+# To open-wa:
+# Dear open wa team,
+# For a while now I've been working on a advanced project, called Water - it's a platform and marketplace for whatsapp tools and services
+# Think of it like a Vercel for whatsapp. The platforms allows users to easily create Functional* whatsapp services, and give/sell them to other users.
+
+# Interested: read more here:
+# The platform will host for free - open source services (verified and unreported).
+# each service is given: state machine (with integrated db), api to the user, and a list of events that can be hooked into.
+# Each Service will get out of the box: Personal Invite Link for users (like this service), Managment Portal for admins, and a bunch of other features.
+# Services can have in-service purchases and subscriptions, and the platform will take a small cut from the purchase. 
+# The Services will be super easy to share, and also searchable (if not set to private).
+# The services are annonimous by default, and the users are obfuscated, so user's personal information is not exposed (unless the user agrees to share)
+# Since you guys are, in my opinion, the best whatsapp api, I would love to have a partnership with you.
+# From my side, I will host the generic platform (open-source).
+# I hope we can create together a new tier of license key, which will allow users/buisnesses to create these applications.
+# 
+# 
+
+## service:
+# user was added to group
+# welcome message and instructions (init)
+# 
+
+
+# personal app bank:
+# akeyo beta (tags subscription) (chatgpt data/event manager)
+# wholesomeTinders 
+# WarmWinters
+# Googler
+# Music
+# wishbook
+# Sarale's Channel (Multi Services Channel)
+# Text To Image
+# payment request
+# 
