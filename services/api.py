@@ -16,11 +16,20 @@ class question():
 	pass
 
 class WaterAPI():
+
+	def __init__(self, driver) -> None:
+		self._driver = driver
+
 	def respond(*args, **kwargs):
 		print(" ::::::::: RESPONDING ? API ::::::::::::", *args, **kwargs)
 		
-	def send(origin, data, *args, **kwargs):
+	def send(self,origin, data, *args, **kwargs):
+
 		print(" ::::::::: SENDING SOMETHING API ::::::::::::",origin, data, args, kwargs)
+		if self._driver is not None:
+			self._driver.sendText(origin, "[Results]\n" + str(data) )
+			print("DONE")
+
 		
 	# def sendPoll(self, title, options, callback = None):
 	def sendPoll(self, poll:poll, *args, **kwargs):
@@ -29,12 +38,13 @@ class WaterAPI():
 	def sendQuestion(self, question, callback = None, filter=None, filterResponse=None , *args, **kwargs):
 		print(" ::::::::: SENDING Question API ::::::::::::",question, callback , filter, filterResponse, args, kwargs)
 		
-class someService():
+class someService(object):
 	name="someService"
 	title = " ::: Some Service :::"
 	iconURL = ""
 	_api = None
 	state = {} # use xo.redis ?
+
 	def __init__(self, api:WaterAPI,*args,**kwargs):
 		self._api = api
 		

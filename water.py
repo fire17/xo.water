@@ -184,9 +184,10 @@ def setGroupToService(group, service):
 		water.groups += [group]
 		water.groups[group].service = service
 		water.services[service].groups[group]
-		serviceObject: someService = water.services[service]._service
+		# serviceObject: someService = water.services[service]._service
+		serviceObject = water.services[service]._service
 
-		water.sendMessage(f" ::: Changing Group {group} to service {service} :::",group, water.services[service]._service.title)
+		water.sendMessage(f"[Changing Group]\n {group} to service {service} :::",group, water.services[service]._service.title)
 		water._driver.setGroupTitle(group, serviceObject.title)
 		water._driver.setGroupIconByUrl(group, serviceObject.iconURL)
 	else:
@@ -197,9 +198,9 @@ def loadServices(water):
 	# water.services.googler.api = WaterAPI()
 	# water.services.googler = Googler()
 	for service in [Googler,]:
-		api = WaterAPI()
+		api = WaterAPI(water._driver)
 		api.service = service
-		water.services[service.name].api = api
+		water.services[service.name]._api = api
 		water.services[service.name]._service = service(api)
 
 
@@ -209,7 +210,6 @@ def main():
 
 	# These are available:
 	# water.logs.info('::: Starting simple Service on port')
-	loadServices(water)
 	number = '972547932000@c.us'
 	# secure = "0B2FDC9C-FADF48A9-92E5F3D1-D2CDA55A"
 	# secure = "secure_api_key"
@@ -230,6 +230,7 @@ def main():
 
 	# Sync/Async support
 	print(" ::: CONNECTED! ", water._driver.getHostNumber())  # Sync request
+	loadServices(water)
 	# water._driver.sendAudio(NUMBER,
 	# 				"https://download.samplelib.com/mp3/sample-3s.mp3",
 	# 				sync=False,
@@ -1121,7 +1122,9 @@ def manage_incoming(message, *a, **kw):
 	text = None
 	if "chat" in msgType:
 		text = message["data"]["content"]
-	isMe = message["data"]["sender"]["isMe"]
+	isMe = False
+	if "data" in message and "sender" in message["data"] and message["data"]["sender"] is not None:
+		isMe = message["data"]["sender"]["isMe"]
 	print()
 	print("::::::::incoming :::::::::", origin, user, msgType, text, a, kw)
 	if isMe and user == origin:
@@ -1138,7 +1141,9 @@ def manage_incoming(message, *a, **kw):
 		# should pass message data to service 
 		if text and not text.startswith("["):
 			water.sendMessage(_message=f"[will be handled by {serviceName} service]", _number=origin)
-			water.services[serviceName]._service.on_incoming(incomingEvent("message",message, origin, user),)
+			targetService = water.services[serviceName]._service
+			event = incomingEvent("message",message, origin, user)
+			targetService.on_incoming(event)
 			
 	elif isMe:
 		print("????????????????????")
@@ -1182,12 +1187,12 @@ def manage_incoming(message, *a, **kw):
 
 		origin = message["data"]["chat"]["id"]
 		print(f" incoming ::: {a} {kw} \n",
-			  message["data"]["sender"]["id"], origin, "\n", body, "\n")
+                    user, origin, "\n", body, "\n")
 		useEcho = True
 		useEcho = False
 
 		response = "ECHO!\n" + body
-		if message["data"]["sender"]["isMe"] and origin == defaultNumber:
+		if isMe and origin == defaultNumber:
 			# print(" ::: message from me :::")
 			response += "\n\n ::: message from me :::"
 			if "ECHO" in body:
