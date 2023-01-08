@@ -1080,6 +1080,8 @@ def AnalyzeAudio(message, factored = False):
 		traceback.print_exc()
 	return text
 
+from customTextEncoder import *
+import emoji
 
 def processRootCommands(message):
 	origin = message["data"]["chatId"]
@@ -1112,6 +1114,31 @@ def processRootCommands(message):
 			setGroupToService(groupID, body.split(" ")[1])
 		inviteURL = "TODO invite url"
 		print(" ::: DONE CREATING GROUP :::", groupID, inviteURL)
+	elif body.startswith("/secret "):
+		secret = "......"
+		secret = body.split("/secret")[1].strip()
+		secret_wrapped = wrapSecret(emoji.demojize(secret))
+		# res = " ::: creating new group group :::" + secret
+		# water.sendMessage(_message=res, _number=defaultNumber)
+		# final = water._driver.createGroup(groupName, ["972543610404@c.us"])
+		# final = water.createGroup(groupName, ["972543610404@c.us"])
+		# water.sendMessage(_message=f"GROUP CREATED {final}", _number=defaultNumber)
+		water.sendMessage(_message=secret_wrapped, _number=origin)
+	elif body.startswith("/detect "):
+		secret = "......"
+		secret = body.split("/detect")[1].strip()
+		secret_wrapped = recoverSecret(secret)
+		# res = " ::: creating new group group :::" + secret
+		# water.sendMessage(_message=res, _number=defaultNumber)
+		# final = water._driver.createGroup(groupName, ["972543610404@c.us"])
+		# final = water.createGroup(groupName, ["972543610404@c.us"])
+		# water.sendMessage(_message=f"GROUP CREATED {final}", _number=defaultNumber)
+		water.sendMessage(_message=str(emoji.emojize(secret_wrapped)), _number=origin)
+		# groupID = final["wid"]["_serialized"]
+		# if len(body.split(" ")) > 0:
+		# 	setGroupToService(groupID, body.split(" ")[1])
+		# inviteURL = "TODO invite url"
+		# print(" ::: DONE CREATING GROUP :::", groupID, inviteURL)
 
 
 def manage_incoming(message, *a, **kw):
