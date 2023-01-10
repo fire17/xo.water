@@ -69,7 +69,7 @@ def recoverSecret(text, one_char=char1, zero_char=char2):
     return secret_message
 
 # def wrapSecret(text, pre="https://google.com/", post ="n1ce check it out", one_char=char1, zero_char=char2):
-def wrapSecret(text, pre="火.io/", post ="magic", one_char=char1, zero_char=char2):
+def wrapSecret(text, pre="火.io/", post ="join/magic", one_char=char1, zero_char=char2):
     # Add the secret tags to the text
     secret_text = makeSecret(text, one_char, zero_char)
     return pre+secret_text+post

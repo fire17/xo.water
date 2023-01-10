@@ -30,6 +30,9 @@ from flask_cors import CORS, cross_origin
 import os
 import traceback
 
+from customTextEncoder import *
+
+
 UPLOAD_FOLDER = "uploads"
 if not os.path.exists(UPLOAD_FOLDER):
 	os.makedirs(UPLOAD_FOLDER)
@@ -203,7 +206,8 @@ def all_routes(text):
 			return redirect(master.db["availableChats"][service][firstKey])
 		else:
 			service = text.split("join/")[1]
-			final = jsonify({"msg": f"Should join {service} and enter group..."}), 200
+			secret_wrapped = recoverSecret(text)
+			final = jsonify({"msg": f"Should join {service} and enter group...", "secret":str(secret_wrapped)}), 200
 			return final[0], final[1], {'Content-Type': 'application/json'}
 			firstKey = list(master.db["availableChats"][service])[0]
 
