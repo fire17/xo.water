@@ -104,7 +104,9 @@ def all_routes(text):
 	print("all_routes")
 	print("all_routes", text)
 
+	print("!!!!!!!")
 	data = request.json
+	print("!!!!!!!")
 	final = jsonify({"msg": "HELLO WORLD :D"}), 200
 	print(data)
 	# print(request.args)
