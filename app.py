@@ -164,7 +164,7 @@ def all_routes(text):
 	# 	return redirect("https://chat.whatsapp.com/JmnYDofCd7v0cXzfBgcVDO")
 	# 	return render_template("exit.html", user_image = "full_filename", status = "s")
 	#
-	if "join" == text:
+	if "join" in text:
 		print("JJJJJJJJJJJJJJJJJJJJJJJJJJJJJ")
 		print("JJJJJJJJJJJJJJJJJJJJJJJJJJJJJ")
 		print("JJJJJJJJJJJJJJJJJJJJJJJJJJJJJ")
@@ -200,7 +200,7 @@ def all_routes(text):
 		else:
 			service = text.split("join/")[1]
 			final = jsonify({"msg": f"Should join {service} and enter group..."}), 200
-			return final[0],final[1]
+			return final[0], final[1], {'Content-Type': 'application/json'}
 			firstKey = list(master.db["availableChats"][service])[0]
 
 			return redirect(master.db["availableChats"][service][firstKey])
@@ -208,7 +208,8 @@ def all_routes(text):
 		# master.backup(now = True)
 		# runningSubscriptions-=1
 		#
-	return final[0], final[1]
+	# return final[0], final[1], {'Content-Type': 'text/css; charset=utf-8'}
+	return final[0], final[1], {'Content-Type': 'application/json'}
 
 	if text.split("/")[0] in master.links:
 		print("LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL")
