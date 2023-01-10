@@ -1125,14 +1125,14 @@ def processRootCommands(message):
 		post = ""
 		if len(splitSecret) > 1:
 			secret = splitSecret[0]
-			secret_wrapped = wrapSecret(emoji.emojize(secret), post = splitSecret[1])
+			secret_wrapped = wrapSecret(emoji.demojize(secret), post = splitSecret[1])
 			if len(splitSecret) > 2:
 				post = " "+" ".join(splitSecret[2:])
 			
 
 		# if 		secret = body.split("/secret")[1].strip()
 		else:
-			secret_wrapped = wrapSecret(emoji.emojize(secret))
+			secret_wrapped = wrapSecret(emoji.demojize(secret))
 
 		# res = " ::: creating new group group :::" + secret
 		# water.sendMessage(_message=res, _number=defaultNumber)
@@ -1151,7 +1151,7 @@ def processRootCommands(message):
 		# final = water.createGroup(groupName, ["972543610404@c.us"])
 		# water.sendMessage(_message=f"GROUP CREATED {final}", _number=defaultNumber)
 		# water.sendMessage(_message=str(emoji.demojize(secret_wrapped))+" "+str(freeText), _number=origin)
-		water.sendMessage(_message=str(emoji.demojize(secret_wrapped)), _number=origin)
+		water.sendMessage(_message=str(emoji.emojize(secret_wrapped)), _number=origin)
 		# groupID = final["wid"]["_serialized"]
 		# if len(body.split(" ")) > 0:
 		# 	setGroupToService(groupID, body.split(" ")[1])
