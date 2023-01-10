@@ -111,8 +111,10 @@ def all_routes(text):
 	original_text = text
 	if secret_wrapped is not None:
 		text = secret_wrapped
+		print("TTTTTTTTTTTT secret",text)
 
-	print("!!!!!!!",request, request.__dict__, request.__dir__(), )
+	# print("!!!!!!!",request, request.__dict__, request.__dir__(), )
+	print("!!!!!!!")#,request, request.__dict__, request.__dir__(), )
 	if "method" in request.__dict__ and request.__dict__["method"] == "POST":
 		data = request.json
 		print(data)
@@ -214,8 +216,16 @@ def all_routes(text):
 			final = jsonify({"msg": f"Should join {service} and enter group...", "secret":str(secret_wrapped)}), 200
 			return final[0], final[1], {'Content-Type': 'application/json'}
 			firstKey = list(master.db["availableChats"][service])[0]
+	
 
 			return redirect(master.db["availableChats"][service][firstKey])
+			
+	if "redirect" in text:
+		print("RRRRRRRRRRRRRRRRRRR")
+		forward = text.split("redirect/")[1]
+		if "https://" not in forward or "http://" not in forward:
+			forward = "https://"+forward
+		return redirect(forward)
 		#
 		# master.backup(now = True)
 		# runningSubscriptions-=1
