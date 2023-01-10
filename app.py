@@ -3,6 +3,7 @@ from flask_socketio import SocketIO, emit, send, join_room, leave_room
 from flask import Flask, render_template, redirect, request, jsonify, url_for, send_from_directory
 from xo import *
 
+from pprint import pprint as pp
 # from flask_jwt_extended import decode_token
 # from flask_jwt_extended import JWTManager
 # from flask_jwt_extended import jwt_required
@@ -105,20 +106,20 @@ def all_routes(text):
 	print("all_routes", text)
 
 	print("!!!!!!!",request, request.__dict__, request.__dir__(), )
-	# data = request.json
+	if "method" in request.__dict__ and request.__dict__["method"] == "POST":
+		data = request.json
+		print(data)
+		print(request.args)
+		# if data is not None:
+			# print(request.json)
+			# pass
+			# if "checkUsername" in data:
+			# 	res = checkUsername(data["checkUsername"])
+			# 	final = jsonify({"result":res[0], "msg":res[1]}), 200
+		# return final[0], final[1]
 
 	print("!!!!!!!")
 	final = jsonify({"msg": "HELLO WORLD :D"}), 200
-	# print(data)
-	# print(request.args)
-	# if data is not None:
-		# print(request.json)
-		# pass
-		# if "checkUsername" in data:
-		# 	res = checkUsername(data["checkUsername"])
-		# 	final = jsonify({"result":res[0], "msg":res[1]}), 200
-	# return final[0], final[1]
-
 	# master = Master.shares[0]
 	# requestOrigin = {'ip': request.remote_addr, "location": getIpLocation(request.remote_addr)}
 	if text.split("/")[0] == "send":
