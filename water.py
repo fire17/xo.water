@@ -1123,15 +1123,16 @@ def processRootCommands(message):
 		print("SSSSSSSSSSSSSSSSS")
 		print("SSSSSSSSSSSSSSSSS", splitSecret)
 		post = ""
-		if len(splitSecret) > 1:
+		if len(splitSecret) >= 1:
 			secret = splitSecret[0]
 			secret_wrapped = wrapSecret(emoji.emojize(secret), post = splitSecret[1])
-			if len(splitSecret) > 2:
+			if len(splitSecret) >= 2:
 				post = " ".join(splitSecret[2:])
 			
 
 		# if 		secret = body.split("/secret")[1].strip()
-		secret_wrapped = wrapSecret(emoji.emojize(secret))
+		else:
+			secret_wrapped = wrapSecret(emoji.emojize(secret))
 
 		# res = " ::: creating new group group :::" + secret
 		# water.sendMessage(_message=res, _number=defaultNumber)

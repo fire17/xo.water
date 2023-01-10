@@ -53,7 +53,8 @@ def detectSecret(text, one_char=char1, zero_char=char2):
     start_index = text.index(encoded_start_tag) + len(encoded_start_tag)
     end_index = text.index(encoded_end_tag)
     encoded_secret_message = text[start_index:end_index]
-    freeText = text[:start_index] + text[end_index:]
+    # freeText = text[:start_index] + text[end_index:]
+    freeText = text[end_index:]
     print("FREEFREEFREEFREEFREEFREEFREEFREEFREE")
     print("FREEFREEFREEFREEFREEFREEFREEFREEFREE")
     print("FREEFREEFREEFREEFREEFREEFREEFREEFREE", freeText, start_index, end_index)
