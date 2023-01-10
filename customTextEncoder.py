@@ -74,7 +74,8 @@ def recoverSecret(text, one_char=char1, zero_char=char2):
         return None, text
         
     freeTextPre = text[:min(text.index(char1), text.index(char2))]
-    freeTextPost = text[max(text.index(char1), text.index(char2)):]
+    freeTextPost = text[::-1][min(text[::-1].index(char1), text[::-1].index(char2)):][::-1]
+    
     # freeTextPre = text[:text.index(encoded_secret_message)]
     # freeTextPost = text[text.index(encoded_secret_message)+len(freeTextPre):]
     freeText = freeTextPre + ":::" +freeTextPost
