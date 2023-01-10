@@ -215,6 +215,11 @@ def all_routes(text):
 			# secret_wrapped = recoverSecret(text)
 			final = jsonify({"msg": f"Should join {service} and enter group...",
 			                "secret": str(secret_wrapped), "freeText": freeText}), 200
+			print("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFinal")
+			print("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFinal")
+			print("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFinal")
+			print("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFinal",final)
+			return redirect("https://chat.whatsapp.com/DklS7L8EL9p043uEWzTPZ8")
 			return final[0], final[1], {'Content-Type': 'application/json'}
 			firstKey = list(master.db["availableChats"][service])[0]
 	
