@@ -105,14 +105,15 @@ def all_routes(text):
 	print("all_routes", text)
 
 	print("!!!!!!!",request, request.__dict__, request.__dir__(), )
-	data = request.json
+	# data = request.json
+
 	print("!!!!!!!")
 	final = jsonify({"msg": "HELLO WORLD :D"}), 200
-	print(data)
+	# print(data)
 	# print(request.args)
-	if data is not None:
+	# if data is not None:
 		# print(request.json)
-		pass
+		# pass
 		# if "checkUsername" in data:
 		# 	res = checkUsername(data["checkUsername"])
 		# 	final = jsonify({"result":res[0], "msg":res[1]}), 200
