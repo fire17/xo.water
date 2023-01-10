@@ -104,7 +104,7 @@ def all_routes(text):
 	print("all_routes")
 	print("all_routes", text)
 
-	print("!!!!!!!",request, request.__dict__, request.__dir__())
+	print("!!!!!!!",request, request.__dict__, request.__dir__(), )
 	data = request.json
 	print("!!!!!!!")
 	final = jsonify({"msg": "HELLO WORLD :D"}), 200
