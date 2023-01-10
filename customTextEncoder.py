@@ -54,17 +54,23 @@ def detectSecret(text, one_char=char1, zero_char=char2):
     end_index = text.index(encoded_end_tag)
     encoded_secret_message = text[start_index:end_index]
     # freeText = text[:start_index] + text[end_index:]
-    freeText = text[end_index:]
-    print("FREEFREEFREEFREEFREEFREEFREEFREEFREE")
-    print("FREEFREEFREEFREEFREEFREEFREEFREEFREE")
-    print("FREEFREEFREEFREEFREEFREEFREEFREEFREE", freeText, start_index, end_index)
+    # freeText = text[end_index:]
+    # print("FREEFREEFREEFREEFREEFREEFREEFREEFREE")
+    # print("FREEFREEFREEFREEFREEFREEFREEFREEFREE")
+    # print("FREEFREEFREEFREEFREEFREEFREEFREEFREE", freeText, start_index, end_index)
 
-    return encoded_secret_message, freeText 
+    return encoded_secret_message#, freeText 
 
 
 def recoverSecret(text, one_char=char1, zero_char=char2):
     # Check if there is a secret present in the text
-    encoded_secret_message, freeText = detectSecret(text, one_char, zero_char)
+    print("RECOVER:::::::::::::::::")
+    print(text)
+    encoded_secret_message = detectSecret(text, one_char, zero_char)
+    print("secret:::::::::::::::::",encoded_secret_message)
+    freeText = text.replace(encoded_secret_message, "")
+    print("secret:::::::::::::::::",freeText)
+
     if encoded_secret_message is None:
         return None, freeText
 
