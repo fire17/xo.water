@@ -47,26 +47,27 @@ def detectSecret(text, one_char=char1, zero_char=char2):
     encoded_start_tag = encode("<secret>", one_char, zero_char)
     encoded_end_tag = encode("</secret>", one_char, zero_char)
     if encoded_start_tag not in text or encoded_end_tag not in text:
-        return None
+        return None, text
 
     # Extract the encoded secret message from the text
     start_index = text.index(encoded_start_tag) + len(encoded_start_tag)
     end_index = text.index(encoded_end_tag)
     encoded_secret_message = text[start_index:end_index]
+    freeText = text[:start_index] + text[end_index:]
 
-    return encoded_secret_message
+    return encoded_secret_message, freeText 
 
 
 def recoverSecret(text, one_char=char1, zero_char=char2):
     # Check if there is a secret present in the text
-    encoded_secret_message = detectSecret(text, one_char, zero_char)
+    encoded_secret_message, freeText = detectSecret(text, one_char, zero_char)
     if encoded_secret_message is None:
         return None
 
     # Decode the secret message
     secret_message = decode(encoded_secret_message, one_char, zero_char)
 
-    return secret_message
+    return secret_message, freeText
 
 # def wrapSecret(text, pre="https://google.com/", post ="n1ce check it out", one_char=char1, zero_char=char2):
 # def wrapSecret(text, pre="火.io/", post ="join/magic", one_char=char1, zero_char=char2):
@@ -96,10 +97,10 @@ if __name__ == "__main__":
     encoded_secret_text = makeSecret(secret_text, char1, char2)
     text = f"https://google.com/"+encoded_secret_text+"/ Some text after the secret."
     print(text)
-    recovered = recoverSecret(text, char1, char2)
+    recovered, _ = recoverSecret(text, char1, char2)
     print(recovered)  # Output: "This is a secret message."
     assert secret_text == recovered
     print("...d0ne...")
-    recovered = recoverSecret("http://火.io/ֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿmagic", char1, char2)
+    recovered, _ = recoverSecret("http://火.io/ֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿֿmagic", char1, char2)
     print("!!!!!!!!!!!!!!!!!!")
     print(recovered)

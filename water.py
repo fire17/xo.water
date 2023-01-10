@@ -1117,23 +1117,36 @@ def processRootCommands(message):
 	elif body.startswith("/secret "):
 		secret = "......"
 		secret = body.split("/secret")[1].strip()
-		secret_wrapped = wrapSecret(emoji.demojize(secret))
+		# secret_wrapped = wrapSecret(emoji.emojize(secret), post = "🔐")
+		splitSecret = secret.split(" ")
+		post = ""
+		if len(splitSecret) > 1:
+			secret = splitSecret[0]
+			secret_wrapped = wrapSecret(emoji.emojize(secret), post = splitSecret[1])
+			if len(splitSecret) 2:
+				post = " ".join(splitSecret[2:])
+			
+
+		# if 		secret = body.split("/secret")[1].strip()
+		secret_wrapped = wrapSecret(emoji.emojize(secret))
+
 		# res = " ::: creating new group group :::" + secret
 		# water.sendMessage(_message=res, _number=defaultNumber)
 		# final = water._driver.createGroup(groupName, ["972543610404@c.us"])
 		# final = water.createGroup(groupName, ["972543610404@c.us"])
 		# water.sendMessage(_message=f"GROUP CREATED {final}", _number=defaultNumber)
-		water.sendMessage(_message=secret_wrapped, _number=origin)
+
+		water.sendMessage(_message=secret_wrapped+post, _number=origin)
 	elif body.startswith("/detect "):
 		secret = "......"
 		secret = body.split("/detect")[1].strip()
-		secret_wrapped = recoverSecret(secret)
+		secret_wrapped, freeText = recoverSecret(secret)
 		# res = " ::: creating new group group :::" + secret
 		# water.sendMessage(_message=res, _number=defaultNumber)
 		# final = water._driver.createGroup(groupName, ["972543610404@c.us"])
 		# final = water.createGroup(groupName, ["972543610404@c.us"])
 		# water.sendMessage(_message=f"GROUP CREATED {final}", _number=defaultNumber)
-		water.sendMessage(_message=str(emoji.emojize(secret_wrapped)), _number=origin)
+		water.sendMessage(_message=str(emoji.demojize(secret_wrapped)), _number=origin)
 		# groupID = final["wid"]["_serialized"]
 		# if len(body.split(" ")) > 0:
 		# 	setGroupToService(groupID, body.split(" ")[1])

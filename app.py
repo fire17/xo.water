@@ -107,7 +107,7 @@ def all_routes(text):
 	print("all_routes")
 	print("all_routes")
 	print("all_routes", text)
-	secret_wrapped = recoverSecret(text)
+	secret_wrapped, freeText = recoverSecret(text)
 	original_text = text
 	if secret_wrapped is not None:
 		text = secret_wrapped
@@ -213,13 +213,14 @@ def all_routes(text):
 		else:
 			service = text.split("join/")[1]
 			# secret_wrapped = recoverSecret(text)
-			final = jsonify({"msg": f"Should join {service} and enter group...", "secret":str(secret_wrapped)}), 200
+			final = jsonify({"msg": f"Should join {service} and enter group...",
+			                "secret": str(secret_wrapped)}, "freeText": freeText), 200
 			return final[0], final[1], {'Content-Type': 'application/json'}
 			firstKey = list(master.db["availableChats"][service])[0]
 	
 
 			return redirect(master.db["availableChats"][service][firstKey])
-			
+
 	if "redirect" in text:
 		print("RRRRRRRRRRRRRRRRRRR")
 		forward = text.split("redirect/")[1]
