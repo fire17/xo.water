@@ -62,7 +62,7 @@ def recoverSecret(text, one_char=char1, zero_char=char2):
     # Check if there is a secret present in the text
     encoded_secret_message, freeText = detectSecret(text, one_char, zero_char)
     if encoded_secret_message is None:
-        return None
+        return None, freeText
 
     # Decode the secret message
     secret_message = decode(encoded_secret_message, one_char, zero_char)
