@@ -1127,7 +1127,7 @@ def processRootCommands(message):
 			secret = splitSecret[0]
 			secret_wrapped = wrapSecret(emoji.emojize(secret), post = splitSecret[1])
 			if len(splitSecret) >= 2:
-				post = " ".join(splitSecret[2:])
+				post = " "+" ".join(splitSecret[2:])
 			
 
 		# if 		secret = body.split("/secret")[1].strip()

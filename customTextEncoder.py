@@ -68,11 +68,15 @@ def recoverSecret(text, one_char=char1, zero_char=char2):
     print(text)
     encoded_secret_message = detectSecret(text, one_char, zero_char)
     print("secret:::::::::::::::::",encoded_secret_message)
-    freeText = text.replace(encoded_secret_message, "")
-    print("secret:::::::::::::::::",freeText)
+    
 
     if encoded_secret_message is None:
-        return None, freeText
+        return None, text
+        
+    freeTextPre = text[:text.index(encoded_secret_message)]
+    freeTextPost = text[text.index(encoded_secret_message)+len(encoded_secret_message):]
+    freeText = freeTextPre + ":::" +freeTextPost
+    print("free:::::::::::::::::",freeText)
 
     # Decode the secret message
     secret_message = decode(encoded_secret_message, one_char, zero_char)
