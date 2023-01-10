@@ -47,7 +47,7 @@ def detectSecret(text, one_char=char1, zero_char=char2):
     encoded_start_tag = encode("<secret>", one_char, zero_char)
     encoded_end_tag = encode("</secret>", one_char, zero_char)
     if encoded_start_tag not in text or encoded_end_tag not in text:
-        return None, text
+        return None, [text,None]
 
     # Extract the encoded secret message from the text
     start_index = text.index(encoded_start_tag) + len(encoded_start_tag)
@@ -58,27 +58,34 @@ def detectSecret(text, one_char=char1, zero_char=char2):
     # print("FREEFREEFREEFREEFREEFREEFREEFREEFREE")
     # print("FREEFREEFREEFREEFREEFREEFREEFREEFREE")
     # print("FREEFREEFREEFREEFREEFREEFREEFREEFREE", freeText, start_index, end_index)
-
-    return encoded_secret_message#, freeText 
+    freeTextPre = text[:min(text.index(char1), text.index(char2))]
+    freeTextPost = text[::-1][:min(text[::-1].index(char1), text[::-1].index(char2))][::-1]
+    
+    return encoded_secret_message, [freeTextPre, freeTextPost]#, freeText 
 
 
 def recoverSecret(text, one_char=char1, zero_char=char2):
     # Check if there is a secret present in the text
     print("RECOVER:::::::::::::::::")
     print(text)
-    encoded_secret_message = detectSecret(text, one_char, zero_char)
+    encoded_secret_message, freeText = detectSecret(text, one_char, zero_char)
     print("secret:::::::::::::::::",encoded_secret_message)
     
 
     if encoded_secret_message is None:
         return None, text
         
-    freeTextPre = text[:min(text.index(char1), text.index(char2))]
-    freeTextPost = text[::-1][:min(text[::-1].index(char1), text[::-1].index(char2))][::-1]
     
     # freeTextPre = text[:text.index(encoded_secret_message)]
     # freeTextPost = text[text.index(encoded_secret_message)+len(freeTextPre):]
-    freeText = freeTextPre + ":::" +freeTextPost
+    if len(freeText) == 2:
+        if freeText[0] is None:
+            freeText = freeText[1]
+        elif freeText[1] is None:
+            freeText = freeText[0]
+        else:
+            freeText = " ::: ".join(freeText)
+            
     print("free:::::::::::::::::",freeText)
 
     # Decode the secret message
