@@ -74,7 +74,7 @@ def recoverSecret(text, one_char=char1, zero_char=char2):
         return None, text
         
     freeTextPre = text[:text.index(encoded_secret_message)]
-    freeTextPost = text[text.index(encoded_secret_message)+len(encoded_secret_message):]
+    freeTextPost = text[text.index(encoded_secret_message)+len(freeTextPre):]
     freeText = freeTextPre + ":::" +freeTextPost
     print("free:::::::::::::::::",freeText)
 
