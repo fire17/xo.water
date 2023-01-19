@@ -1,16 +1,32 @@
 #xo.water.py
+# Water System
+import requests
+from tools import *
+from wservices import LoadWaterServices
+from wa_automate_socket_client import SocketClient
+from xo.redis import xoRedis, xo , Expando
+from customTextEncoder import *
+import emoji
 
-
-from gtts import gTTS
-from pydub import AudioSegment
-import shazi
-# from munch import Munch
-
-import speech_recognition as sr
-recognizer = sr.Recognizer()
-
+# Basic
+import time
 import os
+import traceback
+import json
 
+
+# Sockets
+from tokenize import group
+
+#Extra
+from pprint import pprint as pp
+
+
+# from rich.prompt import Prompt
+
+
+# Wa Automate Docs: 
+# https: // openwa.dev/docs/api/classes/api_Client.Client
 
 # simple Service
 # npx @open-wa/wa-automate --socket -p 8085 -k "$WA_KEY"
@@ -21,23 +37,14 @@ import os
 # water.Simple.send(number="972547932000", msg="Hello from simple.py")
 
 ######################################    imports and setup    ####################################################
-# Wa Automate Docs: 
-# https: // openwa.dev/docs/api/classes/api_Client.Client
 
-import time
-from tokenize import group
-import traceback
-from rich.prompt import Prompt
-from wa_automate_socket_client import SocketClient
-from xo.redis import xoRedis, xo , Expando
-import json
-import os
+
+
 cwd = os.path.dirname(os.path.abspath(__file__))
 print(" ::: cwd:", cwd)
 
 water = xoRedis('water')
-
-from pprint import pprint as pp
+appServices = None
 
 def getEnvKey(key="WA_KEY"):
 	return os.environ.get(key, "Please export the WA_KEY environment variable.")
@@ -68,6 +75,88 @@ host, port = "localhost", 8085
 defaultNumber = "972547932000@c.us"
 
 
+def ParticipantChanged(data,*a,**kw):
+	print("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP")
+	print("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP")
+	print("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP")
+	print(":::::::::::::::::", a)
+	pp(data)
+	print(":::::::::::::::::", kw)
+	print("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP")
+	print("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP")
+	print("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP")
+	origin = data["data"]["chat"]
+	user = data["data"]["who"]
+	action = data["data"]["action"]
+	if action == "add":
+		print(" ::: Participant Added ::: ", user)
+		if user == defaultNumber:
+			print(" ::: Welcome Admin ::: ", user)
+		else:
+			print(" ::: Welcome New User ::: ", user)
+
+		# Give a second for the service to be ready for the group
+		time.sleep(3)
+		if origin and water.rollingGroups[origin].service() is not None:
+		# if origin in water.rollingGroups.value:
+			print("O O O O O O O O O O O O O O O O O O O O O O")
+			print("O O O O O O O O O O O O O O O O O O O O O O")
+			print("O O O O O O O O O O O O O O O O O O O O O O")
+			print("O O O O O O O O O O O O O O O O O O O O O O")
+			print("O O O O O O O O O O O O O O O O O O O O O O")
+			print("O O O O O O O O O O O O O O O O O O O O O O")
+			print("O O O O O O O O O O O O O O O O O O O O O O")
+			print("O O O O O O O O O O O O O O O O O O O O O O")
+			print("O O O O O O O O O O O O O O O O O O O O O O")
+			print("O O O O O O O O O O O O O O O O O O O O O O")
+			print("O O O O O O O O O O O O O O O O O O O O O O")
+			print("O O O O O O O O O O O O O O O O O O O O O O")
+			print("O O O O O O O O O O O O O O O O O O O O O O")
+			print("O O O O O O O O O O O O O O O O O O O O O O")
+			print("O O O O O O O O O O O O O O O O O O O O O O")
+			print("O O O O O O O O O O O O O O O O O O O O O O")
+			print("O O O O O O O O O O O O O O O O O O O O O O")
+			print("O O O O O O O O O O O O O O O O O O O O O O")
+			print("O O O O O O O O O O O O O O O O O O O O O O")
+			print("O O O O O O O O O O O O O O O O O O O O O O")
+			print("O O O O O O O O O O O O O O O O O O O O O O")
+			targetService = water.rollingGroups[origin].service()
+			print(" :::::::::::::: ENTERED ROLLING GROUP of ",targetService)
+			# create new group in the stack
+			# TODO: check isMe istead of defaultNumber (change default number on connected)
+			if user != defaultNumber:
+				print(f" ::: NEWWWWWWWW USER JOINED!!!!!!!!!!!! {user} ")
+				# TODO: Change _number = origin to service.admingroup
+				# thisGroupName = "Get current name"
+				thisGroupName = water.groups[origin].name
+				base64icon = water.groups[origin].base64icon
+				newGroupID, newFinal = newGroupService(targetService=targetService, debug=True, addRolling=True, _number = origin, overrideTitle = thisGroupName, overrideBase64Icon = base64icon)
+				water.sendMessage(
+					_message=f"_New USER Participant ADDED - Service: {targetService} User:{user}_ \n_new rolling group in the background {newGroupID} {newFinal['invite_link']}_", _number=origin)
+			else:
+				print(f" ::: USER AND ORIGIN ARE THE SAME {origin} ")
+				water.sendMessage(
+					_message=f"_Admin Participant Changed - Service: {targetService}_", _number=origin)
+		else:
+			print(" ::: No Service ::: ", origin)
+			print(" ::: Rolling Groups ::: ", water.rollingGroups.value)
+		# water.Simple.send(number=user, msg="Welcome to the group!")
+	# PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP
+	# ::::::::::::::::: ()
+	# {'data': {'action': 'add',
+	#           'chat': '120363031776520233@g.us',
+	#           'who': '972547932000@c.us'},
+	#  'event': 'onGlobalParticipantsChanged',
+	#  'id': '88bc2dcc-5e1c-48bf-b5e4-bdbcbcd053ba',
+	#  'sessionId': 'session',
+	#  'ts': 1673970719200}
+	# ::::::::::::::::: {}
+	# PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP
+	# PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP
+		
+
+water.ParticipantChanged = ParticipantChanged
+
 def manage_polls(data,*a,**kw):
 	print("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP")
 	print("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP")
@@ -83,7 +172,70 @@ def manage_polls(data,*a,**kw):
 water.ManagePolls = manage_polls
 
 
-def sendMessage(_message="fresh grass", _number="972547932000@c.us", *a, **kw):
+def send(self, chatID, content, thumbnail = None, service = "test", autoPreview = False):
+	if autoPreview and "http" in content:
+		if thumbnail is None or "dict" not in type(thumbnail) or len(thumnbnail)==0:
+			thumbnail = {}
+		url = str(re.search("(?P<url>https?://[^\s]+)", content).group("url"))
+		preview = self.GetWebpagePreview(url)
+		if "image" in preview:
+			print("!!!!!!!",thumbnail,type(preview))
+			thumbnail["imageurl"] = preview["image"]
+		else:
+			thumbnail["imageurl"] = ""
+		if "title" in preview:
+			thumbnail["title"] = preview["title"]
+		if "description" in preview:
+			thumbnail["desc"] = preview["description"]
+		thumbnail["link"] = url
+
+
+	if "/" in content:
+		if "image" == content.split("/")[0]:
+			imagepath = "/".join(content.split("\n")[0].split("/")[1:])
+			sendBack = ""
+			if "\n" in content:
+				sendBack = "\n".join(content.split("\n")[1:])
+			return self.driver.send_media(imagepath,chatID,sendBack)
+				# self.driver.send_media(imagepath,chatID,content)
+	if thumbnail is not None:
+		imageurl = "https://media1.tenor.com/images/7528819f1bcc9a212d5c23be19be5bf6/tenor.gif"
+		title = "AAAAAAAAAA"
+		desc = "BBBBBBB"
+		link = imageurl
+		path = ""
+			#
+			# pT = Thread(target = self.sendPreview, args = [[chatID, url, content]])
+			# pT.start()
+			# return True
+
+		sendAttachment = False
+		if "imageurl" in thumbnail:
+			if thumbnail["imageurl"] is None:
+				thumbnail["imageurl"] = ""
+				imageurl = ""
+			else:
+				imageurl = thumbnail["imageurl"]
+			path = self.download_image(service = service, pic_url=imageurl)
+			print("PPPPPPPPPPPPPPPPPPP",path)
+			if "title" in thumbnail and thumbnail["title"] is not None:
+				title = thumbnail["title"]
+				if "desc" in thumbnail and thumbnail["desc"] is not None:
+					desc = thumbnail["desc"]
+					if "link" in thumbnail and thumbnail["link"] is not None:
+						link = thumbnail["link"]
+						sendAttachment = True
+
+		if sendAttachment:
+			res = self.driver.send_message_with_thumbnail(path,chatID,url=link,title=title,description=desc,text=content)
+			print(res)
+			print("TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT", path, "LINK",link,"TEXT",content)
+			return res
+
+	return self.driver.sendMessage(chatID, content)
+
+
+def sendMessage(_message="fresh grass", _number="972547932000@c.us", url = None, *a, **kw):
 	if "_xo" in kw:
 		_message = kw["_xo"].value
 	if isinstance(_message, dict):
@@ -119,10 +271,19 @@ def sendMessage(_message="fresh grass", _number="972547932000@c.us", *a, **kw):
 	message = payload["message"] if payload else _message
 	print(":::!!!!!!!send::::::::::::::", message, number)
 	if "_driver" in water:
-		print(
-			f" Sending MEssage..... {number} {message} ::: {a} {kw} \n", payload, "\n")
-		water._driver.sendText(number, message)
-		print(f" Sending MEssage ::: {a} {kw} \n", payload, "\n")
+		print(f" Sending Message..... {number} {message} ::: {a} {kw} \n", payload, "\n")
+		
+		# else:
+		if url is not None:
+			print("WITH AUTO PREVIEW!!!!!!!!!!!")
+			print("WITH AUTO PREVIEW!!!!!!!!!!!")
+			print("WITH AUTO PREVIEW!!!!!!!!!!!")
+			print("WITH AUTO PREVIEW!!!!!!!!!!!")
+			# water._driver.sendLinkWithAutoPreview(number, url, text = message)
+			water._driver.sendLinkWithAutoPreview(number, url, message)
+		else:
+			water._driver.sendText(number, message)
+		print(f" Message Sent ::: {a} {kw} \n", payload, "\n")
 	else:
 		print(" ::: Driver not connected yet :::")
 
@@ -150,7 +311,7 @@ class flow(Expando):
 # water.newMedia = lambda payload, *a,**kw : water.sendMedia(payload)
 # water.newLocation = lambda payload, *a,**kw : water.sendLocation(payload)
 # water.newSticker = lambda payload, *a,**kw : water.sendSticker(payload)
-from services.googler import Googler
+# from services.googler import Googler
 from services.api import *
 # from services.warmWinters import WarmWinters
 
@@ -161,15 +322,15 @@ def loadGroups():
 		water.groups = []
 		groups = water.groups()
 	for group in groups:
-		print("GGGGGGGGGGGGGGGGGGG",group)
 		water.groups[group]()
 		water.groups[group].service()
+		print(" ::: Loaded Group", group, water.groups[group].service.value)
 
 
 loadGroups()
 
 
-def setGroupToService(group, service):
+def setGroupToService(group, service, setServiceAdminGroup = False, groupName = None, overrideIconURL = None, overrideBase64Icon = None):
 	if service in water.services:
 		print(f" ::: SETTING GROUP {group} to service {service}")
 		print(f" ::: SETTING GROUP {group} to service {service}")
@@ -184,96 +345,124 @@ def setGroupToService(group, service):
 		water.groups += [group]
 		water.groups[group].service = service
 		water.services[service].groups[group]
-		# serviceObject: someService = water.services[service]._service
 		serviceObject = water.services[service]._service
+		if groupName is None:
+			groupName = serviceObject.title
+
+		water.groups[group].name = groupName
+		# serviceObject: someService = water.services[service]._service
+		if setServiceAdminGroup:
+			serviceObject.SuperAdminGroup = group
+		water._driver.setGroupTitle(group, groupName+"!!!")
+		
+		if overrideBase64Icon is None:
+			icon_url = serviceObject.iconURL
+			if overrideIconURL is not None:
+				icon_url = overrideIconURL
+
+			
+
+			if "path:" in icon_url:
+				imageData = open(icon_url.replace("path:",""), "rb").read()
+				imageDataB64 = base64.b64encode(imageData)
+			else:
+				image = requests.get(icon_url).content
+				imageDataB64 = base64.b64encode(image)
+
+			# water._driver.setGroupIconByUrl(group, serviceObject.iconURL)
+			# open image from 
+			# imageDataB64 = base64.b64encode(image)
+			print(str(imageDataB64))
+			# finalBase64 = f"data:image/jpeg;base64,{str(imageDataB64)[2:-1]}"
+			
+			image_type = "png"
+			if ".jpg" in icon_url or ".jpeg" in icon_url:
+				image_type = "jpeg"
+			finalBase64 = f"data:image/{image_type};base64,{str(imageDataB64)[2:-1]}"
+		else:
+			finalBase64 = overrideBase64Icon
+		water.groups[group].base64icon = finalBase64
+		print("=====================")
+		print(finalBase64)
+		print("=====================")
+		water._driver.setGroupIcon(group, finalBase64)
 
 		water.sendMessage(f"[Changing Group]\n {group} to service {service} :::",group, water.services[service]._service.title)
-		water._driver.setGroupTitle(group, serviceObject.title)
-		water._driver.setGroupIconByUrl(group, serviceObject.iconURL)
 	else:
 		print(f" --- Service {service} is not loaded in water ---")
+water.setGroupToService = setGroupToService
 
 
 def loadServices(water):	
+	# v0.0.1
 	# water.services.googler.api = WaterAPI()
 	# water.services.googler = Googler()
-	for service in [Googler,]:
-		api = WaterAPI(water._driver)
-		api.service = service
-		water.services[service.name]._api = api
-		water.services[service.name]._service = service(api)
 
-
-
+	# v0.1
+	# for service in [Googler,]:
+	# 	api = WaterAPI(water._driver)
+	# 	api.service = service
+	# 	water.services[service.name]._api = api
+	# 	water.services[service.name]._service = service(api)
 	
-def main():
+	# v0.2
+	all_services = LoadWaterServices(water)
+	for service in all_services:
+		print(" ::: Loaded Service", service)
+		# api = WaterAPI(water._driver)
+		# api.service = service
+		Service = all_services[service]
+		water.services[Service.name]._service = Service
+		water.services[Service.name]._api = Service._api
+		
+	print("VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV")
+	print("VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV")
+	print("VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV")
+	print("VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV")
+	for service in water.services:
+		print(" :::::::::: service ", service, " ::: ", water.services[service])
+		# water.services[service.name]._service = service(api)
 
-	# These are available:
-	# water.logs.info('::: Starting simple Service on port')
-	number = '972547932000@c.us'
-	# secure = "0B2FDC9C-FADF48A9-92E5F3D1-D2CDA55A"
-	# secure = "secure_api_key"
-	_client = SocketClient(f'http://{host}:{port}/', wa_key)
-	water._driver = _client
-	print("!!!!!!!!!!!!!!!!!","_driver" in water, water._driver)
-	def printResponse(message):
-		print(" incoming :::\n", message["data"]["body"],"\n")
 
-	# Listening for events
-	# water._driver.onMessage(printResponse)
-	# water._driver.onMessage(water.ManageIncoming)
-	water._driver.onAnyMessage(water.ManageIncoming)
-	water._driver.onPollVote(water.ManagePolls)
-
-	# Executing commands
-	water._driver.sendText(number, "fresh waters!!!!!!")
-
-	# Sync/Async support
-	print(" ::: CONNECTED! ", water._driver.getHostNumber())  # Sync request
-	loadServices(water)
-	# water._driver.sendAudio(NUMBER,
-	# 				"https://download.samplelib.com/mp3/sample-3s.mp3",
-	# 				sync=False,
-	# 				callback=printResponse)  # Async request. Callback is optional
-
-	# Finally disconnect
-	# client.disconnect()
 
 
 water._groups = {}
-water._apps = {"Google": {"name": " GOOGLE", "icon_url": "",
-						   "description": "Google Search", "invite_link": ""}}
+# water._apps = {"Google": {"name": " GOOGLE", "icon_url": "",
+# 						   "description": "Google Search", "invite_link": ""}}
+
+
+# # @Simple
+# def setGroupApp(group_id, app, *args, **kwargs):
+# 	if "_driver" not in water:
+# 		print(" setGroupApp ::: Driver not connected yet :::")
+# 		return False
+
+# 	if group_id not in water._groups:
+# 		water._groups[group_id] = {}
+# 	# if app not in water._apps:
+# 	# 	water._apps[app] = {}
+
+# 	water._groups[group_id]["app"] = app
+
+# 	# Change group name to app name
+# 	water._driver.setGroupTitle(group_id, water._apps[app]["name"])
+# 	# water._driver.setGroupIconByUrl(water._groups[group]["id"], water._apps[app]["icon_url"])
+# 	# water._driver.setGroupDescription(group_id, water._apps[app]["description"])
+# 	print("@@@@@@@@@@@@@@@@@@ setGroupApp: ",
+# 		  group_id, water._apps[app]["name"], water._apps[app]["description"])
+# 	return True
 
 
 # @Simple
-def setGroupApp(group_id, app, *args, **kwargs):
-	if "_driver" not in water:
-		print(" setGroupApp ::: Driver not connected yet :::")
-		return False
-
-	if group_id not in water._groups:
-		water._groups[group_id] = {}
-	# if app not in water._apps:
-	# 	water._apps[app] = {}
-
-	water._groups[group_id]["app"] = app
-
-	# Change group name to app name
-	water._driver.setGroupTitle(group_id, water._apps[app]["name"])
-	# water._driver.setGroupIconByUrl(water._groups[group]["id"], water._apps[app]["icon_url"])
-	# water._driver.setGroupDescription(group_id, water._apps[app]["description"])
-	print("@@@@@@@@@@@@@@@@@@ setGroupApp: ",
-		  group_id, water._apps[app]["name"], water._apps[app]["description"])
-	return True
-
-
-# @Simple
-def createGroup(Name=" ::: Test ::: ", participants=["972543610404@c.us"], *args, **kwargs):
+def createGroup(Name=" ::: Test ::: ", participants=["972543610404@c.us"], debug=False, *args, **kwargs):
 	print("Creating group: ,,,,,,,,")
 	if "_driver" not in water:
 		print(" ::: Driver not connected yet :::")
 		return False
 	res = water._driver.createGroup(Name, participants)
+	if "Error: " in res:
+		print(" ::: createGroup failed  XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX :::\n"*10,res)
+		return None
 	print("Created group: ", res)
 	time.sleep(1)
 	# res2 = "FAILED"
@@ -309,7 +498,8 @@ def createGroup(Name=" ::: Test ::: ", participants=["972543610404@c.us"], *args
 	# time.sleep(3)
 	print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 	print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-	print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", res["info"]["groupMetadata"]["id"])
+
+	# print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", res["info"]["groupMetadata"]["id"])
 	# water._driver.sendMessage("WELCOME!",res["wid"]["_serialized"])
 	print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 	print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
@@ -318,6 +508,7 @@ def createGroup(Name=" ::: Test ::: ", participants=["972543610404@c.us"], *args
 	print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 	print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 	print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+	groupID = res["wid"]["_serialized"]
 	if "winter" in Name:
 		# water._driver.sendImage("https://i.ibb.co/1dZj8pT/winter.jpg", res["wid"]["_serialized"], "WELCOME!")
 		water._driver.setGroupTitle(res["wid"]["_serialized"], " ::: *חורף חם* ::: ")
@@ -329,12 +520,15 @@ def createGroup(Name=" ::: Test ::: ", participants=["972543610404@c.us"], *args
 
 		תודה רבה על ההשתתפות!
 		שיהיה לכולנו *חורף חם!*"""
-		water.sendMessage(warmWintersMsg,res["info"]["groupMetadata"]["id"])
+		# water.sendMessage(warmWintersMsg,res["info"]["groupMetadata"]["id"])
+		water.sendMessage(warmWintersMsg,groupID)
 		water._driver.sendPoll(res["wid"]["_serialized"], "*:חורף חם*",["בקשת חימום", "תרומת חימום", "עזרה במסירה", "הרשמה כעמותה/ספק"])
 
 	else:
-		water.sendMessage("WELCOME!",res["info"]["groupMetadata"]["id"])
-		water._driver.sendPoll(res["wid"]["_serialized"], "How do you like this service?",["good", "great!", "niiccce"])
+		water.sendMessage("[WELCOME!]", groupID)
+		water._driver.setGroupTitle(groupID, "XXXXXXXXXXX")
+
+		# water._driver.sendPoll(res["wid"]["_serialized"], "How do you like this service?",["good", "great!", "niiccce"])
 	print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 	print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 	print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
@@ -344,7 +538,10 @@ def createGroup(Name=" ::: Test ::: ", participants=["972543610404@c.us"], *args
 	print("invite link: ", res["invite_link"])
 	print("invite link: ", res["invite_link"])
 	print("invite link: ", res["invite_link"])
+	if debug:
+		water.sendMessage(_message=f"GROUP CREATED {res}", _number=groupID)
 	return res
+
 water.createGroup = createGroup
 
 # @Simple
@@ -405,683 +602,188 @@ def listGroups(search="*", *args, **kwargs):
 
 
 
+def registerCallbacks():
 
+	# water._driver = openwa.driver
 
-# water._driver = openwa.driver
+	# Create lambda functions for each method in the whatsapp driver
+	water.newGroup @= lambda payload, *a,**kw : water.createGroup(payload, *a,**kw)
+	water.message @= lambda payload, *a,**kw : water.sendMessage(payload, *a,**kw)
+	water.newLink @= lambda payload, *a,**kw : water.createLink(payload)
+	water.silence @= lambda payload, *a,**kw : water.silenceGroup(payload)
+	water.unsilence @= lambda payload, *a,**kw : water.unsilenceGroup(payload)
+	water.poll @= lambda payload, *a,**kw : water.createPoll(payload)
+	# water.onMessage @= lambda payload, *a,**kw : water.ManageIncoming(payload)
 
-# Create lambda functions for each method in the whatsapp driver
-water.newGroup @= lambda payload, *a,**kw : water.createGroup(payload, *a,**kw)
-water.message @= lambda payload, *a,**kw : water.sendMessage(payload, *a,**kw)
-water.newLink @= lambda payload, *a,**kw : water.createLink(payload)
-water.silence @= lambda payload, *a,**kw : water.silenceGroup(payload)
-water.unsilence @= lambda payload, *a,**kw : water.unsilenceGroup(payload)
-water.poll @= lambda payload, *a,**kw : water.createPoll(payload)
-# water.onMessage @= lambda payload, *a,**kw : water.ManageIncoming(payload)
-
-# water.timedMessage = lambda payload, *a,**kw : water.sendTimedMessage(payload)
-# water.onAck @= lambda payload, *a,**kw : water.onMessageAck(payload)
-# water.onParticipantsChanged @= lambda payload, *a,**kw : water.handle.onGroupParticipantsChanged(payload)
-# water.onAddedToGroup @= lambda payload, *a,**kw : water.handle.onAddedToGroup(payload)
-# water.onRemovedFromGroup @= lambda payload, *a,**kw : water.handle.onRemovedFromGroup(payload)
-# water.onGroupCreated @= lambda payload, *a,**kw : water.handle.onGroupCreated(payload)
-# water.onGroupUpdated @= lambda payload, *a,**kw : water.handle.onGroupUpdated(payload)
-# water.onGroupDeleted @= lambda payload, *a,**kw : water.handle.onGroupDeleted(payload)
-# water.onGroupSettingsChanged @= lambda payload, *a,**kw : water.handle.onGroupSettingsChanged(payload)
-# water.onGroupParticipantIsTyping @= lambda payload, *a,**kw : water.handle.onGroupParticipantIsTyping(payload) # ghost effect
-# water.onGroupParticipantIsRecordingVoice @= lambda payload, *a,**kw : water.handle.onGroupParticipantIsRecordingVoice(payload) # ghost effect
-# water.onGroupParticipantIsPlayingVoice @= lambda payload, *a,**kw : water.handle.onGroupParticipantIsPlayingVoice(payload) # ghost effect
-# water.getGroupAdmins @= lambda payload, *a,**kw : water.Get.GroupAdmins(payload)
-# water.getGroupMembers @= lambda payload, *a,**kw : water.Get.GroupMembers(payload)
-# water.getGroupInviteLink @= lambda payload, *a,**kw : water.Get.GroupInviteLink(payload)
-# water.getGroupInfo @= lambda payload, *a,**kw : water.Get.GroupInfo(payload)
-# water.getGroupMetadata @= lambda payload, *a,**kw : water.Get.GroupMetadata(payload)
-# water.getGroupParticipantIDs @= lambda payload, *a,**kw : water.Get.GroupParticipantIDs(payload)
-# water.getGroupParticipants @= lambda payload, *a,**kw : water.Get.GroupParticipants(payload)
-# water.getGroupPicture @= lambda payload, *a,**kw : water.Get.GroupPicture(payload)
-# water.getGroupSettings @= lambda payload, *a,**kw : water.Get.GroupSettings(payload)
-# water.getGroupStats @= lambda payload, *a,**kw : water.Get.GroupStats(payload)
-# water.getGroupWelcomeMessage @= lambda payload, *a,**kw : water.Get.GroupWelcomeMessage(payload)
-# water.getGroupDescription @= lambda payload, *a,**kw : water.Get.GroupDescription(payload)
-# water.getGroupRules @= lambda payload, *a,**kw : water.Get.GroupRules(payload)
-# water.getGroupAnnouncements @= lambda payload, *a,**kw : water.Get.GroupAnnouncements(payload)
-# water.getMessage @= lambda payload, *a,**kw : water.Get.Message(payload)
-# water.getMessages @= lambda payload, *a,**kw : water.Get.Messages(payload)
-# water.getProfilePicFromServer @= lambda payload, *a,**kw : water.Get.ProfilePicFromServer(payload)
-# water.getProfilePicFromUser @= lambda payload, *a,**kw : water.Get.ProfilePicFromUser(payload)
-# water.getProfilePicThumb @= lambda payload, *a,**kw : water.Get.ProfilePicThumb(payload)
-# water.getProfilePicUrl @= lambda payload, *a,**kw : water.Get.ProfilePicUrl(payload)
-# water.getBatteryLevel @= lambda payload, *a,**kw : water.Get.BatteryLevel(payload)
-# water.getWAVersion @= lambda payload, *a,**kw : water.Get.WAVersion(payload)
-# water.getChatById @= lambda payload, *a,**kw : water.Get.ChatById(payload)
-# water.getChatByName @= lambda payload, *a,**kw : water.Get.ChatByName(payload)
-# water.getChatIds @= lambda payload, *a,**kw : water.Get.ChatIds(payload)
-# water.getChats @= lambda payload, *a,**kw : water.Get.Chats(payload)
-# water.getCommonGroups @= lambda payload, *a,**kw : water.Get.CommonGroups(payload)
-# water.getContact @= lambda payload, *a,**kw : water.Get.Contact(payload)
-# water.getContactIds @= lambda payload, *a,**kw : water.Get.ContactIds(payload)
-# water.getContacts @= lambda payload, *a,**kw : water.Get.Contacts(payload)
-# water.getMe @= lambda payload, *a,**kw : water.Get.Me(payload)
-# water.getMyGroups @= lambda payload, *a,**kw : water.Get.MyGroups(payload)
-# water.getMyStatus @= lambda payload, *a,**kw : water.Get.MyStatus(payload)
-# water.getMessageViews @= lambda payload, *a,**kw : water.Get.MessageViews(payload)
-# water.createQuote @= lambda payload, *a,**kw : water.create.Quote(payload)
-# water.createContact @= lambda payload, *a,**kw : water.create.Contact(payload)
-# water.deleteChat @= lambda payload, *a,**kw : water.Delete.Chat(payload)
-# water.deleteMessages @= lambda payload, *a,**kw : water.Delete.Messages(payload)
-# water.deleteProfilePic @= lambda payload, *a,**kw : water.Delete.ProfilePic(payload)
-# water.deleteStatus @= lambda payload, *a,**kw : water.Delete.Status(payload)
-# water.demoteParticipants @= lambda payload, *a,**kw : water.group.demoteParticipants(payload)
-# water.elevateParticipants @= lambda payload, *a,**kw : water.group.elevateParticipants(payload)
-# water.forwardMessages @= lambda payload, *a,**kw : water.forwardMessages(payload)
-# water.reply @= lambda payload, *a,**kw : water.reply(payload)
-# water.changeGroupService @= lambda payload, *a,**kw : water.change.GroupService(payload)
-# water.changeGroupDescription @= lambda payload, *a,**kw : water.change.GroupDescription(payload)
-# water.changeGroupRules @= lambda payload, *a,**kw : water.change.GroupRules(payload)
-# water.changeGroupAnnouncements @= lambda payload, *a,**kw : water.change.GroupAnnouncements(payload)
-# water.changeGroupPicture @= lambda payload, *a,**kw : water.change.GroupPicture(payload)
-# # water.changeGroupWelcomeMessage @= lambda payload, *a,**kw : water.change.GroupWelcomeMessage(payload)
-# water.changeGroupSettings @= lambda payload, *a,**kw : water.change.GroupSettings(payload)
-# water.changeMyName @= lambda payload, *a,**kw : water.change.MyName(payload)
-# water.changeMyStatus @= lambda payload, *a,**kw : water.change.MyStatus(payload)
-# water.changeMyProfilePic @= lambda payload, *a,**kw : water.change.MyProfilePic(payload)
-# water.changeGroupAdmins @= lambda payload, *a,**kw : water.change.GroupAdmins(payload)
-# water.changeGroupSubject @= lambda payload, *a,**kw : water.change.GroupSubject(payload)
-# water.changeGroupDescription @= lambda payload, *a,**kw : water.change.GroupDescription(payload)
-# water.changeGroupName @= lambda payload, *a,**kw : water.change.GroupName(payload)
-# water.transcribeAudio @= lambda payload, *a,**kw : water.transcribe.Audio(payload)
-# water.sendContact @= lambda payload, *a,**kw : water.send.Contact(payload)
-# water.sendFile @= lambda payload, *a,**kw : water.send.File(payload)
-# water.sendImage @= lambda payload, *a,**kw : water.send.Image(payload)
-# water.sendImageAsSticker @= lambda payload, *a,**kw : water.send.ImageAsSticker(payload)
-# water.sendLinkWithAutoPreview @= lambda payload, *a,**kw : water.send.LinkWithAutoPreview(payload)
-# water.sendLinkWithCustomThumb @= lambda payload, *a,**kw : water.send.LinkWithCustomThumb(payload)
-# water.sendLinkWithDescription @= lambda payload, *a,**kw : water.send.LinkWithDescription(payload)
-# water.sendLinkWithDescriptionAndThumbnail @= lambda payload, *a,**kw : water.send.LinkWithDescriptionAndThumbnail(payload)
-# water.sendLinkWithThumbnail @= lambda payload, *a,**kw : water.send.LinkWithThumbnail(payload)
-# water.summerizeChat @= lambda payload, *a,**kw : water.summerize.Chat(payload)
-# water.summerizeUser @= lambda payload, *a,**kw : water.summerize.User(payload)
-# water.summerizeGroup @= lambda payload, *a,**kw : water.summerize.Group(payload)
-# water.sendGroupInvite @= lambda payload, *a,**kw : water.send.GroupInvite(payload)
-# water.sendGroupStats @= lambda payload, *a,**kw : water.send.GroupStats(payload)
-# water.sendGroupWelcomeMessage @= lambda payload, *a,**kw : water.send.GroupWelcomeMessage(payload)
-# water.sendGroupDescription @= lambda payload, *a,**kw : water.send.GroupDescription(payload)
-# water.sendGroupRules @= lambda payload, *a,**kw : water.send.GroupRules(payload)
-# water.sendGroupAnnouncements @= lambda payload, *a,**kw : water.send.GroupAnnouncements(payload)
-# water.setGroupToAdminsOnly @= lambda payload, *a,**kw : water.Set.GroupToAdminsOnly(payload)
-# water.setGroupToEveryone @= lambda payload, *a,**kw : water.Set.GroupToEveryone(payload)
-# water.setGroupToMembersOnly @= lambda payload, *a,**kw : water.Set.GroupToMembersOnly(payload)
-# water.setGroupToNewMembersOnly @= lambda payload, *a,**kw : water.Set.GroupToNewMembersOnly(payload)
-# water.setGroupToPrivate @= lambda payload, *a,**kw : water.Set.GroupToPrivate(payload)
-# water.setGroupToPublic @= lambda payload, *a,**kw : water.Set.GroupToPublic(payload)
-# water.setGroupToRestricted @= lambda payload, *a,**kw : water.Set.GroupToRestricted(payload)
-# water.setGroupToUnrestricted @= lambda payload, *a,**kw : water.Set.GroupToUnrestricted(payload)
-# water.setProfilePic @= lambda payload, *a,**kw : water.Set.ProfilePic(payload)
-# water.setGroupPicture @= lambda payload, *a,**kw : water.Set.GroupPicture(payload)
-# water.sendServicePublicLink @= lambda payload, *a,**kw : water.send.ServicePublicLink(payload)
-# water.sendServicePrivateLink @= lambda payload, *a,**kw : water.send.ServicePrivateLink(payload)
-# water.setGroupService @= lambda payload, *a,**kw : water.Set.GroupService(payload)
-# water.silenceUser @= lambda payload, *a,**kw : water.silence.User(payload)
-# water.unsilenceUser @= lambda payload, *a,**kw : water.unsilence.User(payload)
-# water.pauseGroup @= lambda payload, *a,**kw : water.pause.Group(payload)
-# water.unpauseGroup @= lambda payload, *a,**kw : water.unpause.Group(payload)
-# water.connectGroups @= lambda payload, *a,**kw : water.connect.Groups(payload)
-# water.disconnectGroups @= lambda payload, *a,**kw : water.disconnect.Groups(payload)
-# water.sendGroupInvite @= lambda payload, *a,**kw : water.send.GroupInvite(payload)
-# water.addAI @= lambda payload, *a,**kw : water.add.AI(payload)
-# water.removeAI @= lambda payload, *a,**kw : water.remove.AI(payload)
-# water.addUserToGroup @= lambda payload, *a,**kw : water.add.UserToGroup(payload)
-# water.removeUserFromGroup @= lambda payload, *a,**kw : water.remove.UserFromGroup(payload)
-water.privateGroup @= lambda payload, *a,**kw : water.private.Group(payload)
-water.publicGroup @= lambda payload, *a,**kw : water.public.Group(payload)
-water.getPortal @= lambda payload, *a,**kw : water.Get.Portal(payload)
-
+	# water.timedMessage = lambda payload, *a,**kw : water.sendTimedMessage(payload)
+	# water.onAck @= lambda payload, *a,**kw : water.onMessageAck(payload)
+	# water.onParticipantsChanged @= lambda payload, *a,**kw : water.handle.onGroupParticipantsChanged(payload)
+	# water.onAddedToGroup @= lambda payload, *a,**kw : water.handle.onAddedToGroup(payload)
+	# water.onRemovedFromGroup @= lambda payload, *a,**kw : water.handle.onRemovedFromGroup(payload)
+	# water.onGroupCreated @= lambda payload, *a,**kw : water.handle.onGroupCreated(payload)
+	# water.onGroupUpdated @= lambda payload, *a,**kw : water.handle.onGroupUpdated(payload)
+	# water.onGroupDeleted @= lambda payload, *a,**kw : water.handle.onGroupDeleted(payload)
+	# water.onGroupSettingsChanged @= lambda payload, *a,**kw : water.handle.onGroupSettingsChanged(payload)
+	# water.onGroupParticipantIsTyping @= lambda payload, *a,**kw : water.handle.onGroupParticipantIsTyping(payload) # ghost effect
+	# water.onGroupParticipantIsRecordingVoice @= lambda payload, *a,**kw : water.handle.onGroupParticipantIsRecordingVoice(payload) # ghost effect
+	# water.onGroupParticipantIsPlayingVoice @= lambda payload, *a,**kw : water.handle.onGroupParticipantIsPlayingVoice(payload) # ghost effect
+	# water.getGroupAdmins @= lambda payload, *a,**kw : water.Get.GroupAdmins(payload)
+	# water.getGroupMembers @= lambda payload, *a,**kw : water.Get.GroupMembers(payload)
+	# water.getGroupInviteLink @= lambda payload, *a,**kw : water.Get.GroupInviteLink(payload)
+	# water.getGroupInfo @= lambda payload, *a,**kw : water.Get.GroupInfo(payload)
+	# water.getGroupMetadata @= lambda payload, *a,**kw : water.Get.GroupMetadata(payload)
+	# water.getGroupParticipantIDs @= lambda payload, *a,**kw : water.Get.GroupParticipantIDs(payload)
+	# water.getGroupParticipants @= lambda payload, *a,**kw : water.Get.GroupParticipants(payload)
+	# water.getGroupPicture @= lambda payload, *a,**kw : water.Get.GroupPicture(payload)
+	# water.getGroupSettings @= lambda payload, *a,**kw : water.Get.GroupSettings(payload)
+	# water.getGroupStats @= lambda payload, *a,**kw : water.Get.GroupStats(payload)
+	# water.getGroupWelcomeMessage @= lambda payload, *a,**kw : water.Get.GroupWelcomeMessage(payload)
+	# water.getGroupDescription @= lambda payload, *a,**kw : water.Get.GroupDescription(payload)
+	# water.getGroupRules @= lambda payload, *a,**kw : water.Get.GroupRules(payload)
+	# water.getGroupAnnouncements @= lambda payload, *a,**kw : water.Get.GroupAnnouncements(payload)
+	# water.getMessage @= lambda payload, *a,**kw : water.Get.Message(payload)
+	# water.getMessages @= lambda payload, *a,**kw : water.Get.Messages(payload)
+	# water.getProfilePicFromServer @= lambda payload, *a,**kw : water.Get.ProfilePicFromServer(payload)
+	# water.getProfilePicFromUser @= lambda payload, *a,**kw : water.Get.ProfilePicFromUser(payload)
+	# water.getProfilePicThumb @= lambda payload, *a,**kw : water.Get.ProfilePicThumb(payload)
+	# water.getProfilePicUrl @= lambda payload, *a,**kw : water.Get.ProfilePicUrl(payload)
+	# water.getBatteryLevel @= lambda payload, *a,**kw : water.Get.BatteryLevel(payload)
+	# water.getWAVersion @= lambda payload, *a,**kw : water.Get.WAVersion(payload)
+	# water.getChatById @= lambda payload, *a,**kw : water.Get.ChatById(payload)
+	# water.getChatByName @= lambda payload, *a,**kw : water.Get.ChatByName(payload)
+	# water.getChatIds @= lambda payload, *a,**kw : water.Get.ChatIds(payload)
+	# water.getChats @= lambda payload, *a,**kw : water.Get.Chats(payload)
+	# water.getCommonGroups @= lambda payload, *a,**kw : water.Get.CommonGroups(payload)
+	# water.getContact @= lambda payload, *a,**kw : water.Get.Contact(payload)
+	# water.getContactIds @= lambda payload, *a,**kw : water.Get.ContactIds(payload)
+	# water.getContacts @= lambda payload, *a,**kw : water.Get.Contacts(payload)
+	# water.getMe @= lambda payload, *a,**kw : water.Get.Me(payload)
+	# water.getMyGroups @= lambda payload, *a,**kw : water.Get.MyGroups(payload)
+	# water.getMyStatus @= lambda payload, *a,**kw : water.Get.MyStatus(payload)
+	# water.getMessageViews @= lambda payload, *a,**kw : water.Get.MessageViews(payload)
+	# water.createQuote @= lambda payload, *a,**kw : water.create.Quote(payload)
+	# water.createContact @= lambda payload, *a,**kw : water.create.Contact(payload)
+	# water.deleteChat @= lambda payload, *a,**kw : water.Delete.Chat(payload)
+	# water.deleteMessages @= lambda payload, *a,**kw : water.Delete.Messages(payload)
+	# water.deleteProfilePic @= lambda payload, *a,**kw : water.Delete.ProfilePic(payload)
+	# water.deleteStatus @= lambda payload, *a,**kw : water.Delete.Status(payload)
+	# water.demoteParticipants @= lambda payload, *a,**kw : water.group.demoteParticipants(payload)
+	# water.elevateParticipants @= lambda payload, *a,**kw : water.group.elevateParticipants(payload)
+	# water.forwardMessages @= lambda payload, *a,**kw : water.forwardMessages(payload)
+	# water.reply @= lambda payload, *a,**kw : water.reply(payload)
+	# water.changeGroupService @= lambda payload, *a,**kw : water.change.GroupService(payload)
+	# water.changeGroupDescription @= lambda payload, *a,**kw : water.change.GroupDescription(payload)
+	# water.changeGroupRules @= lambda payload, *a,**kw : water.change.GroupRules(payload)
+	# water.changeGroupAnnouncements @= lambda payload, *a,**kw : water.change.GroupAnnouncements(payload)
+	# water.changeGroupPicture @= lambda payload, *a,**kw : water.change.GroupPicture(payload)
+	# # water.changeGroupWelcomeMessage @= lambda payload, *a,**kw : water.change.GroupWelcomeMessage(payload)
+	# water.changeGroupSettings @= lambda payload, *a,**kw : water.change.GroupSettings(payload)
+	# water.changeMyName @= lambda payload, *a,**kw : water.change.MyName(payload)
+	# water.changeMyStatus @= lambda payload, *a,**kw : water.change.MyStatus(payload)
+	# water.changeMyProfilePic @= lambda payload, *a,**kw : water.change.MyProfilePic(payload)
+	# water.changeGroupAdmins @= lambda payload, *a,**kw : water.change.GroupAdmins(payload)
+	# water.changeGroupSubject @= lambda payload, *a,**kw : water.change.GroupSubject(payload)
+	# water.changeGroupDescription @= lambda payload, *a,**kw : water.change.GroupDescription(payload)
+	# water.changeGroupName @= lambda payload, *a,**kw : water.change.GroupName(payload)
+	# water.transcribeAudio @= lambda payload, *a,**kw : water.transcribe.Audio(payload)
+	# water.sendContact @= lambda payload, *a,**kw : water.send.Contact(payload)
+	# water.sendFile @= lambda payload, *a,**kw : water.send.File(payload)
+	# water.sendImage @= lambda payload, *a,**kw : water.send.Image(payload)
+	# water.sendImageAsSticker @= lambda payload, *a,**kw : water.send.ImageAsSticker(payload)
+	# water.sendLinkWithAutoPreview @= lambda payload, *a,**kw : water.send.LinkWithAutoPreview(payload)
+	# water.sendLinkWithCustomThumb @= lambda payload, *a,**kw : water.send.LinkWithCustomThumb(payload)
+	# water.sendLinkWithDescription @= lambda payload, *a,**kw : water.send.LinkWithDescription(payload)
+	# water.sendLinkWithDescriptionAndThumbnail @= lambda payload, *a,**kw : water.send.LinkWithDescriptionAndThumbnail(payload)
+	# water.sendLinkWithThumbnail @= lambda payload, *a,**kw : water.send.LinkWithThumbnail(payload)
+	# water.summerizeChat @= lambda payload, *a,**kw : water.summerize.Chat(payload)
+	# water.summerizeUser @= lambda payload, *a,**kw : water.summerize.User(payload)
+	# water.summerizeGroup @= lambda payload, *a,**kw : water.summerize.Group(payload)
+	# water.sendGroupInvite @= lambda payload, *a,**kw : water.send.GroupInvite(payload)
+	# water.sendGroupStats @= lambda payload, *a,**kw : water.send.GroupStats(payload)
+	# water.sendGroupWelcomeMessage @= lambda payload, *a,**kw : water.send.GroupWelcomeMessage(payload)
+	# water.sendGroupDescription @= lambda payload, *a,**kw : water.send.GroupDescription(payload)
+	# water.sendGroupRules @= lambda payload, *a,**kw : water.send.GroupRules(payload)
+	# water.sendGroupAnnouncements @= lambda payload, *a,**kw : water.send.GroupAnnouncements(payload)
+	# water.setGroupToAdminsOnly @= lambda payload, *a,**kw : water.Set.GroupToAdminsOnly(payload)
+	# water.setGroupToEveryone @= lambda payload, *a,**kw : water.Set.GroupToEveryone(payload)
+	# water.setGroupToMembersOnly @= lambda payload, *a,**kw : water.Set.GroupToMembersOnly(payload)
+	# water.setGroupToNewMembersOnly @= lambda payload, *a,**kw : water.Set.GroupToNewMembersOnly(payload)
+	# water.setGroupToPrivate @= lambda payload, *a,**kw : water.Set.GroupToPrivate(payload)
+	# water.setGroupToPublic @= lambda payload, *a,**kw : water.Set.GroupToPublic(payload)
+	# water.setGroupToRestricted @= lambda payload, *a,**kw : water.Set.GroupToRestricted(payload)
+	# water.setGroupToUnrestricted @= lambda payload, *a,**kw : water.Set.GroupToUnrestricted(payload)
+	# water.setProfilePic @= lambda payload, *a,**kw : water.Set.ProfilePic(payload)
+	# water.setGroupPicture @= lambda payload, *a,**kw : water.Set.GroupPicture(payload)
+	# water.sendServicePublicLink @= lambda payload, *a,**kw : water.send.ServicePublicLink(payload)
+	# water.sendServicePrivateLink @= lambda payload, *a,**kw : water.send.ServicePrivateLink(payload)
+	# water.setGroupService @= lambda payload, *a,**kw : water.Set.GroupService(payload)
+	# water.silenceUser @= lambda payload, *a,**kw : water.silence.User(payload)
+	# water.unsilenceUser @= lambda payload, *a,**kw : water.unsilence.User(payload)
+	# water.pauseGroup @= lambda payload, *a,**kw : water.pause.Group(payload)
+	# water.unpauseGroup @= lambda payload, *a,**kw : water.unpause.Group(payload)
+	# water.connectGroups @= lambda payload, *a,**kw : water.connect.Groups(payload)
+	# water.disconnectGroups @= lambda payload, *a,**kw : water.disconnect.Groups(payload)
+	# water.sendGroupInvite @= lambda payload, *a,**kw : water.send.GroupInvite(payload)
+	# water.addAI @= lambda payload, *a,**kw : water.add.AI(payload)
+	# water.removeAI @= lambda payload, *a,**kw : water.remove.AI(payload)
+	# water.addUserToGroup @= lambda payload, *a,**kw : water.add.UserToGroup(payload)
+	# water.removeUserFromGroup @= lambda payload, *a,**kw : water.remove.UserFromGroup(payload)
+	water.privateGroup @= lambda payload, *a,**kw : water.private.Group(payload)
+	water.publicGroup @= lambda payload, *a,**kw : water.public.Group(payload)
+	water.getPortal @= lambda payload, *a,**kw : water.Get.Portal(payload)
+registerCallbacks()
 
 # make public web api, with permissions
 
+def newGroupService(targetService, debug = False, _number=defaultNumber, addRolling = False, overrideTitle = None, setServiceAdminGroup = False):
+		groupName = targetService
+		res = " ::: creating new group group :::" + groupName
+		# water.sendMessage(_message=res, _number=defaultNumber)
+		# final = water._driver.createGroup(groupName, ["972543610404@c.us"])
+		# targetService = None
+		# if len(body.split(" ")) > 0:
+		# 	targetService = body.split(" ")[1]
+		serviceObject = None
+		if targetService in water.services:
+			serviceObject = water.services[targetService]._service
+			groupName = serviceObject.title
 
+		if overrideTitle is not None:
+			groupName = overrideTitle
+		final = water.createGroup(groupName, ["972543610404@c.us"], debug = debug)
+		water.sendMessage(_message=f"_Group {groupName} was created_", _number=_number)
 
+		# water.sendMessage(_message=f"GROUP CREATED {final}", _number=defaultNumber)
+		print("....................")
+		print("....................")
+		print("....................")
+		print("....................")
+		print("....................")
+		print("....................")
+		print("....................")
+		pp(final)
+		print("....................")
+		print("....................")
+		print("....................")
+		groupID = final["wid"]["_serialized"]
 
-def Process(contact, factored=False):
+		if serviceObject is not None:
+			if addRolling:
+				if water.rollingGroups() == None:
+					water.rollingGroups = []
+				water.rollingGroups += [groupID]
+				water.rollingGroups[groupID].service = targetService
 
-	if not factored:
-		message = Munch(contact)
-		# for m in message:
-		# 	print(m,":::",message[m])
-		message.chat = Munch(message.chat)
-		message.sender = Munch(message.sender)
+			setGroupToService(groupID, targetService,
+			                  setServiceAdminGroup=setServiceAdminGroup, groupName = groupName)
 
-	else:
-		# message = contact
-		pass
-	# for message in contact.messages:
-	if True:
-		# print("MMMMMMMMMM",message.content)
-		# {"123":"123"}.get_j
-		if factored:
-			mChatID = message.chat_id
-			mSenderID = message.sender.id
-			mSenderName = message.get_js_obj()["chat"]["contact"]["formattedName"]
-			mType = message.type
-		else:
-			mChatID = message.chat.id
-			message.chat_id = message.chat.id
-			if "clientUrl" in message:
-				message.client_url = message.clientUrl
-			if "mediaKey" in message:
-				message.media_key = message.mediaKey
+		water.sendMessage(
+			_message=f"{final['invite_link']}", _number=_number, url=final["invite_link"])
+		inviteURL = final['invite_link']
+		print(" ::: DONE CREATING GROUP :::", groupID, inviteURL)
+		return groupID, final
 
-			message.chat_id = message.chat.id
-			message.get_js_obj = message
-
-			mSenderID = message.sender.id
-
-			# mSenderName = message.get_js_obj()["chat"]["contact"]["formattedName"]
-			mSenderName = message["chat"]["contact"]["formattedName"]
-			mType = message.type
-
-		LAST[0] = message
-
-		if "ptt" in mType.lower() or "audio" in mType:
-			print("PPPPPTTTTTTTTTT")
-			print("PPPPPTTTTTTTTTT")
-			print("PPPPPTTTTTTTTTT")
-
-			# for k in message:
-			# 	print(k," ::: ", message[k])
-			mContent = self.AnalyzeAudio(message, factored= factored)
-		else:
-			print(mType)
-			print(mType)
-			print(mType)
-			print(mType)
-			print(mType)
-			if factored:
-				mContent = message.content
-			else:
-				mContent = message["content"]
-
-		if mContent is not None and len(mContent) > 0:
-
-			# if runLocal and False: ## FOR FIREFOX
-			# 	chatID = message.chat_id["_serialized"]
-			# else:
-			# 	chatID = mChatID
-			chatID = mChatID
-
-			try:
-				chat = self.driver.get_chat_from_id(chatID)
-			except Exception as e:
-				print(" ::: ERROR - _serialized chatID ::: "+chatID+" ::: ", "\n",e,e.args,"\n")
-
-			''' incoming from: '''
-			''' Personal Chat  '''
-			senderName = mSenderName
-			senderID = mSenderID
-			fromGroup = False
-			if "c" in chatID:
-				print("FFFFFFFFFF")
-				# print(message.get_js_obj())
-				# pp(message.get_js_obj())
-				# self.driver.chat_reply_message(message.id, "awesome")
-				# self.driver.privateReply(message.id, "awesome",chatID)
-				if factored:
-					self.driver.privateReply(message.id, mContent, "972512170493-1612427003@g.us")
-				else:
-					self.driver.privateReply(message["id"], mContent, "972512170493-1612427003@g.us")
-				# self.driver.forward_messages("972512170493-1612427003@g.us",message.id,False)
-				print(
-										'''
-				===================================
-				Incoming Messages from '''+senderID+" "+senderName+'''
-				===================================
-				'''
-				)
-
-				''' SEND TO MASTER SERVICE '''
-				self.masterService.ProcessChat(message)
-
-				# self.driver.remove_participant_group()
-				# if message.type == "chat":
-				# 	text = message.content
-				#
-				# 	print("TTTTTXXXXXXXXXTTTTTTT",text)
-				# 	''' subscribe to service '''
-				#
-				# 	''' SENT FROM GROUP CHAT '''
-				#
-				# 	if "%%%!%%%" in text:
-				# 		target = text.split(u"%%%!%%%")[1]
-				# 		self.driver.sendMessage(chatID,"Adding Service to DB: "+target)
-				# 		self.db["services"][target] = {"dbID":None,"incomingTarget":None}
-				# 		ServiceLoader.LoadService(service = target, send = self.send, backup = self.backupService, genLink = self.genLink)
-				# 		# self.LoadServices()
-				# 		# self.serviceFuncs["services"][target] = None
-				#
-				# 		self.backup(now = True)
-				# 	else:
-				# 		print("XXXXXXXXXXXXXXXXXXX")
-				# 		print("XXXXXXXXXXXXXXXXXXX")
-				# 		print("XXXXXXXXXXXXXXXXXXX")
-				#
-				# 	if text[0] is "/":
-				# 		# "//div[@class='VPvMz']/div/div/span[@data-testid='menu']"
-				# 		print("##################################")
-				# 		print("##################################")
-				# 		print("#####                      #######")
-				# 		print("##################################")
-				# 		print("##################################", text)
-				# 		dotsSide = self.driver.tryOut(self.driver.driver.find_element_by_xpath,text,click=True)
-				#
-				# 	if text[0] is "-":
-				# 	''' person unsubscribing service with -'''
-				# 	target = text[1:]
-				# 	dbChanged = False
-				# 	now = False
-				#
-				# 	''' check target service in db '''
-				# 	serviceFound = False
-				# 	for service in self.services:
-				# 		print("______________ ----------"+service)
-				# 		print("")
-				# 		if not serviceFound and target.lower() == service.lower():
-				# 			target = service
-				#
-				# 			''' service found '''
-				# 			serviceFound = True
-				#
-				# 			if chatID not in self.db["users"]:
-				# 				self.db["users"][chatID] = {}
-				# 				dbChanged = True
-				# 				''' first time user '''
-				# 				# self.db["users"][senderID] = {'services': {'Reminders': {'groupID': None}}}
-				# 			else:
-				# 				pass
-				# 				''' known user '''
-				#
-				#
-				# 			foundChat = None
-				# 			if chatID in self.db["groups"]:
-				# 				if "service" in self.db["groups"][chatID]:
-				# 					self.db["groups"][chatID]["service"] = None
-				#
-				# 			if service in self.db["users"][chatID]:
-				# 				serviceChat = self.db["users"][chatID][service]
-				#
-				# 				# self.driver.sendMessage(senderID,"You are already subscirbed to: "+target+" \nYou can unsubscribe with -"+target.lower())
-				# 				if serviceChat is not None:
-				# 					try:
-				# 						self.db["users"][chatID].pop(service)
-				# 						self.driver.sendMessage(chatID,"Unsubscribing from: *"+service+"*")
-				# 						print("UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU")
-				# 						print("UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU")
-				# 						print("UUUUUUU    UNSUBSCRIBING       UUUUUUUUUUUU")
-				# 						print("UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU")
-				# 						print("UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU")
-				# 						print("UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU",chatID,service)
-				# 						dbChanged = True
-				# 						now = True
-				#
-				# 					except:
-				# 						print('chat could not be found')
-				# 	if not serviceFound:
-				# 		self.driver.sendMessage(chatID,"you are not subscirbed to: *"+service+"*")
-				#
-				#
-				# if text[0] is "=":
-				# 	''' person registering service with ='''
-				# 	target = text[1:]
-				# 	dbChanged = False
-				# 	now = False
-				#
-				# 	''' check target service in db '''
-				# 	serviceFound = False
-				#
-				# 	serviceChat = ""
-				# 	for service in self.services:
-				# 		print("______________ ----------"+service)
-				# 		print("")
-				# 		if not serviceFound and target.lower() == service.lower():
-				# 			target = service
-				#
-				# 			''' service found '''
-				# 			serviceFound = True
-				#
-				# 			if chatID not in self.db["users"]:
-				# 				self.db["users"][chatID] = {}
-				# 				dbChanged = True
-				# 				''' first time user '''
-				# 				# self.db["users"][senderID] = {'services': {'Reminders': {'groupID': None}}}
-				# 			else:
-				# 				pass
-				# 				''' known user '''
-				#
-				#
-				# 			foundChat = None
-				# 			if service in self.db["users"][chatID]:
-				#
-				# 				serviceChat = self.db["users"][chatID][service]
-				#
-				# 				# self.driver.sendMessage(senderID,"You are already subscirbed to: "+target+" \nYou can unsubscribe with -"+target.lower())
-				# 				if serviceChat is not None:
-				# 					try:
-				# 						foundChat = self.driver.get_chat_from_id(serviceChat)
-				# 					except:
-				# 						print('chat could not be found')
-				#
-				#
-				# 			chatName = target
-				# 			welcome = "Thank you for Subscribing to "+target
-				# 			try:
-				# 				chatName = self.services[service]["obj"].name
-				# 				welcome = "Thank you for Subscribing to "+chatName
-				# 				welcome = self.services[service]["obj"].welcome
-				# 			except:
-				# 				pass
-				#
-				# 			if foundChat is not None:
-				# 				check_participents = False
-				# 				if check_participents:
-				# 					if senderID in foundChat.get_participants_ids() or True:
-				# 						'''##### check that user is participant '''
-				# 						self.driver.sendMessage(senderID,"You are already subscirbed to: "+chatName+" \nYou can unsubscribe with -"+target.lower())
-				# 						self.driver.sendMessage(serviceChat,"subscirbed to: "+chatName)
-				# 					else:
-				# 						foundChat = None
-				# 				else:
-				# 					gotLink = False
-				# 					groupName = service
-				# 					path = self.download_image()
-				# 					inviteLink = ""
-				#
-				# 					print("$$$$$$$$$$$$$$$$$$$$$$$")
-				# 					print(serviceChat, self.db["groups"][serviceChat]  )
-				# 					if serviceChat in self.db["groups"] and self.db["groups"][serviceChat] is not None and "invite" in self.db["groups"][serviceChat]:
-				# 						if self.db["groups"][serviceChat]["invite"] is not None:
-				# 							inviteLink = self.db["groups"][serviceChat]["invite"]
-				# 							gotLink = True
-				# 							if service in self.services and "obj" in self.services[service] and self.services[service]["obj"] is not None:
-				# 								groupName = self.services[service]["obj"].name
-				# 								imageurl = self.services[service]["obj"].imageurl
-				# 								if imageurl is not None:
-				# 									path = self.download_image(service=service,pic_url=imageurl)
-				#
-				#
-				# 					content = "You are already subscirbed to:\n"+chatName+" \n"
-				# 					if gotLink:
-				# 						content+= inviteLink
-				# 					content+="\n"+"You can unsubscribe with -"+target.lower()
-				#
-				# 					if gotLink:
-				# 						res = self.driver.send_message_with_thumbnail(path,senderID,url=inviteLink,title="Open  "+groupName,description="xxx",text=content)
-				# 					else:
-				# 						self.driver.sendMessage(senderID,content)
-				# 					self.driver.sendMessage(serviceChat,"subscirbed to: "+chatName)
-				#
-				#
-				# 			''' create new group '''
-				# 			if foundChat is None:
-				# 				print(
-				# 				'''
-				# 				===============================================
-				# 				 ''' + senderID +" CREATING NEW GROUP "+ target +" :D "+'''
-				# 				===============================================
-				# 				'''
-				# 				)
-				# 				groupName = service
-				# 				path = self.download_image()
-				# 				if service in self.services and "obj" in self.services[service] and self.services[service]["obj"] is not None:
-				# 					groupName = self.services[service]["obj"].name
-				# 					imageurl = self.services[service]["obj"].imageurl
-				# 					if imageurl is not None:
-				# 						path = self.download_image(service=service,pic_url=imageurl)
-				#
-				#
-				#
-				# 				imagepath = path
-				# 				newGroup, groupInvite = self.driver.newGroup(newGroupName = groupName, number = "+"+senderID.split("@")[0], local = runLocal, image=imagepath)
-				# 				newGroupID = newGroup.id
-				#
-				# 				self.newG = newGroupID
-				#
-				# 				self.db["users"][chatID][service] = newGroupID
-				# 				self.db["groups"][newGroupID] = {"service":target, "invite":groupInvite}
-				# 				dbChanged = True
-				# 				now = True
-				# 				print(
-				# 				'''
-				# 				===============================================
-				# 				 ''' + senderID +" is NOW SUBSCRIBED TO "+ target +" :D "+'''
-				# 				===============================================
-				# 				'''
-				# 				)
-				#
-				# 				res = self.driver.send_message_with_thumbnail(path,senderID,url=groupInvite,title="Open  "+groupName,description="BBBBBBBB",text="Thank you! you are now subscribed to: "+chatName+" \n"+str(groupInvite)+"\nPlease check your new group :)")
-				# 				# self.driver.sendMessage(senderID,"Thank you! you are now subscribed to: "+chatName+" \n"+str(groupInvite)+"\nPlease check your new group :)")
-				# 				self.driver.sendMessage(newGroupID,welcome)
-				# 				# self.driver.sendMessage(serviceChat,"subscirbed to: "+target)
-				#
-				# 	if not serviceFound:
-				# 		self.driver.sendMessage(chatID,target+" : is not recognized as a service "+target)
-				# 		print(
-				# 		'''
-				# 		===============================================
-				# 		  SERVICE '''+ target +" IS NOT AVAILABLE"+'''
-				# 		===============================================
-				# 		'''
-				# 		)
-				# 	if dbChanged:
-				# 		self.backup(now=now)
-				#
-
-			# ''' Group Chat '''
-			elif "g" in chatID:
-				fromGroup = True
-
-				# self.driver.privateReply(message.id, mContent,"972512170493-1612427003@g.us")
-				# self.driver.privateReply(message.id, mContent,senderID)
-
-				print(
-										'''
-				===============================================
-					Incoming Messages in Group \"'''+mChatID+" "+senderName+" from "+senderID+'''
-				===============================================
-				'''
-				)
-				if message.type == "chat" or True:
-					text = mContent
-
-
-					# ''' GOT REGISTRATION COMMAND '''
-					# if text[0] is "=":
-					# 	foundService = None
-					# 	target = text[1:]
-					#
-					# 	''' register group to service '''
-					# 	for service in self.services:
-					# 		if target.lower() == service.lower():
-					# 			foundService = service
-					#
-					# 			foundChat = False
-					# 			if chatID in self.db["groups"]:
-					# 				if "service" not in self.db["groups"][chatID]:
-					# 					invite = None
-					# 					if "invite" in self.db["groups"][chatID]:
-					# 						invite = self.db["groups"][chatID]["invite"]
-					# 					link = None
-					# 					if "link" in self.db["groups"][chatID]:
-					# 						link = self.db["groups"][chatID]["link"]
-					# 					self.db["groups"][chatID] = {"service":service,"invite":invite, "link":link}
-					#
-					# 				targetService = self.db["groups"][chatID]["service"]
-					# 				print("TTTTTTTTTTTTTTTTTTTT")
-					# 				print(targetService, service)
-					# 				if targetService is not None:
-					# 					if targetService.lower() == service.lower():
-					# 						foundChat = True
-					# 						self.driver.sendMessage(chatID,"You are already subscirbed to: "+target+" \nYou can unsubscribe with -"+target.lower())
-					#
-					# 			if not foundChat:
-					# 				print("SSSSSSSSSSSSSSSSSSSSSSsxxxxx")
-					# 				print("SSSSSSSSSSSSSSSSSSSSSSsxxxxx")
-					# 				print("SSSSSSSSSSSSSSSSSSSSSSsxxxxx")
-					# 				self.driver.sendMessage(chatID,"Subscribing to service: "+self.services[service]["obj"].name)
-					# 				self.driver.sendMessage(chatID,self.services[service]["obj"].welcome)
-					# 				link = self.genLink(api = self.services[service]["api"],service=service,chatID=chatID,answer="")
-					# 				self.db["groups"][chatID] = {"service":service, "invite":None, "link":link}
-					# 				self.backup()
-					#
-					# 	if foundService is None:
-					# 		self.driver.sendMessage(chatID,"service: "+target+" Not Found")
-
-					''' Chat is not registered first time'''
-					if chatID not in self.db["groups"]:
-						# print("SSSSSSSSSSSSSSSSSSSSSS")
-						# self.driver.sendMessage(chatID,"This chat is not registered with any service yet\nYou can register it by sending =service_name")
-						# print("JJJJJJJJJJJJJJ")
-						self.db["groups"][chatID] = {"service": None, "invite":None, "link":None}
-						# print("SSSSSSSSSSSSSSSSSSSSSS")
-						self.backup()
-
-					if self.db["groups"][chatID] is not None:
-						''' Chat is known '''
-						if "service" not in self.db["groups"][chatID] or self.db["groups"][chatID]["service"] is None:
-							invite = None
-							if "invite" in self.db["groups"][chatID]:
-								invite = self.db["groups"][chatID]["invite"]
-							# self.db["groups"][chatID] = {"service":self.db["groups"][chatID],"invite":invite}
-							link = None
-							if "link" in self.db["groups"][chatID]:
-								link = self.db["groups"][chatID]["link"]
-							self.db["groups"][chatID] = {"service": None,"invite":invite, "link":link}
-							# self.driver.sendMessage(chatID,"This chat is not registered with any service yet\nYou can register it by sending =service_name")
-
-						target = self.db["groups"][chatID]["service"]
-						print("MMMMMMMMMMMMMMMM", target)
-
-						if target is not None:
-							foundService = None
-							for service in self.services:
-								if target.lower() == service.lower():
-									foundService = service
-
-									''' CHAT IS REGISTERED TO SERVICE! '''
-									''' PROCESS INCOMNG MESSAGE in SERVICE '''
-									if foundService is not None:
-
-										''' this is where the magic happens - send to service'''
-
-										if "obj" in self.services[foundService]:
-											obj = self.services[foundService]["obj"]
-											if obj is not None:
-												#Get Nicknames
-												quoted = None
-												if factored:
-													j = message.get_js_obj()
-												else:
-													j = message
-													# pass #j = message.get_js_obj()
-												if "quotedMsg" in j:
-													quoted = j["quotedMsg"]
-												self.ProcessServiceAsync(obj, {"origin":chatID, "user":senderID, "content":text, "mID":message.id, "mType":mType, "quotedMsg":quoted})
-												# obj.process({"origin":chatID, "user":senderID, "content":text})
-
-										# self.ProcessServiceAsync(service,chatID,text)
-
-							if foundService is None:
-								self.driver.sendMessage(chatID, target+" : is not recognized as a service "+target)
-
-def AnalyzeAudioFile(self, path, defLanguage = 'iw-IL'):
-	text = ""
-	try:
-		# audio.export(path, format="wav")
-		''' speech to '''
-		# notSent = False
-		with sr.AudioFile(path) as source:
-			rec = recognizer.record(source)
-			text = recognizer.recognize_google(rec)
-			# self.sendMessage(message.chat_id, "Got from Speech:\n*"+text+"*")
-	except:
-		traceback.print_exc()
-		# notSent = True
-	return text
-	
-def AnalyzeAudio(message, factored = False):
-	if message is None:
-		return None
-	shortRec = 3.5
-	text = ""
-	try:
-		# LAST[0] = message
-		# LAST["o"] = {}
-		# if factored:
-		# 	jobj = message.get_js_obj()
-		# else:
-		# 	jobj = message
-		jobj = message["data"]
-		origin = message["data"]["chat"]["id"] 
-		ok = origin == message["data"]["sender"]["id"]
-		print("JJJJJJJJJJJJ",origin,ok)
-		print()
-		# water._driver.sendMessage(origin, "_Analyzing Audio Please Wait..._")
-		water.sendMessage(_message="_Analyzing Audio Please Wait..._", _number=defaultNumber)
-		jobj["clientUrl"] = jobj["deprecatedMms3Url"]
-
-		# ptt = water._driver.download_media(jobj)
-		ptt = water._driver.download(jobj["clientUrl"])
-		print("\n"*5)
-		print("PTT: ", ptt)
-		print("\n"*4)
-		# audio = AudioSegment.from_file(ptt)
-		audio = AudioSegment.from_file(jobj["filePath"])
-		
-
-		length = len(audio)
-		# audio = AudioSegment.from_file(ptt)
-		# path = "rec.wav"
-		# path = "recs/"+message.chat_id.split("@")[0]+"_rec"+".wav"
-		path = "recs/"+origin.split("@")[0]+"_rec"+".wav"
-		# if True:
-		audio.export(path, format="wav")
-		''' speech to '''
-		print("path: ", path)
-		print("path: ", path)
-		print("path: ", path)
-		print("path: ", path)
-		print("path: ", path)
-		print("path: ", path)
-		print("path: ", path)
-		print("path: ", path)
-		print("path: ", path)
-		notSent = False
-		try:
-			with sr.AudioFile(path) as source:
-				rec = recognizer.record(source)
-
-				text = recognizer.recognize_google(rec, language = 'iw-IL')
-				water.sendMessage(_message="Got from Speech:\n*"+text+"*", _number=defaultNumber)
-
-				# water._driver.sendMessage(origin, "Got from Speech:\n*"+text+"*")
-		except:
-			traceback.print_exc()
-			notSent = True
-
-		shazamLimit = 22
-		if length > shortRec * 1000:
-			''' shazam '''
-			o = shazi.shazam(path)
-			tx = time.time()
-			while "title" not in o and time.time()-tx < shazamLimit:
-				time.sleep(1)
-			# water._driver.sendMessage(message.chat_id, "Got from Shazam:\n*"+str(o["title"]+" - "+o["artist"])+"*")
-			water.sendMessage(_message= "Got from Shazam:\n*"+str(o["title"]+" - "+o["artist"])+"*", _number=defaultNumber)
-
-			text = str(o["title"]+" - "+o["artist"])
-	except:
-		traceback.print_exc()
-	return text
-
-from customTextEncoder import *
-import emoji
+water.newGroupService = newGroupService
 
 def processRootCommands(message):
 	origin = message["data"]["chatId"]
@@ -1100,20 +802,10 @@ def processRootCommands(message):
 		poll = water._driver.sendPoll(origin, "How do you like this service?", [
 			"good", "great!", "niiccce"])
 
-	elif body.startswith("/group"):
-		groupName = "......"
-		groupName = body.split("/group")[1].strip()
-		res = " ::: creating new group group :::" + groupName
-		# water.sendMessage(_message=res, _number=defaultNumber)
-		# final = water._driver.createGroup(groupName, ["972543610404@c.us"])
-		final = water.createGroup(groupName, ["972543610404@c.us"])
-		# water.sendMessage(_message=f"GROUP CREATED {final}", _number=defaultNumber)
-		water.sendMessage(_message=f"GROUP CREATED {final}", _number=origin)
-		groupID = final["wid"]["_serialized"]
-		if len(body.split(" ")) > 0:
-			setGroupToService(groupID, body.split(" ")[1])
-		inviteURL = "TODO invite url"
-		print(" ::: DONE CREATING GROUP :::", groupID, inviteURL)
+	elif body.startswith("/group") and len(body.split(" ")) > 1:
+		# groupName = "......"
+		return newGroupService(body.split(" ")[1], debug=True, _number = origin, setServiceAdminGroup=True)
+		
 	elif body.startswith("/secret "):
 		secret = "......"
 		secret = body.split("/secret")[1].strip()
@@ -1172,10 +864,12 @@ def manage_incoming(message, *a, **kw):
 		isMe = message["data"]["sender"]["isMe"]
 	print()
 	print("::::::::incoming :::::::::", origin, user, msgType, text, a, kw)
-	if isMe and user == origin:
+	SuperAdminGroup = [] # Todo: add admin groups
+	if isMe and user == origin or origin in SuperAdminGroup:
 		print(f"This is the root manager isMe:{isMe}",origin)
 		processRootCommands(message)
-	elif isMe and origin in water.groups.value:
+	# elif isMe and origin in water.groups.value:
+	elif origin in water.groups.value:
 		serviceName = water.groups[origin].service.value
 		print(" @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ ")
 		print(" @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ ")
@@ -1183,9 +877,15 @@ def manage_incoming(message, *a, **kw):
 		print(" @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ ")
 		print(" @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ ")
 		
+		if isMe and text and str(text).startswith("/adduser") and len(str(text).split(" "))>1:
+			targetUser = str(text).split(" ")[1]
+			payload = {"data":{"chat":origin,"who":targetUser, "action":"add"}}
+			ParticipantChanged(payload)
+		
+
 		# should pass message data to service 
 		if text and not text.startswith("["):
-			water.sendMessage(_message=f"[will be handled by {serviceName} service]", _number=origin)
+			# water.sendMessage(_message=f"[will be handled by {serviceName} service]", _number=origin)
 			targetService = water.services[serviceName]._service
 			event = incomingEvent("message",message, origin, user)
 			targetService.on_incoming(event)
@@ -1196,13 +896,40 @@ def manage_incoming(message, *a, **kw):
 		for knownGroup in water.groups:
 			print(" -",knownGroup)
 		print("????????????????????")
+		if origin in water.groups:
+			print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! found group",origin)
+		if origin in water.groups.value:
+			print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! found group",origin)
+		serviceName = "Not Found"
+		if origin in water.groups.value:
+			serviceName = water.groups[origin].service.value
+			print(" @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ ")
+			print(" @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ ")
+			print(f" @@@@@@@@ INCOMING MESSAGE TO SERVICE {serviceName} ")
+			print(" @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ ")
+			print(" @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ ")
+		
+			# should pass message data to service 
+			if text and not text.startswith("["):
+				water.sendMessage(_message=f"[will be handled by {serviceName} service]", _number=origin)
+				targetService = water.services[serviceName]._service
+				event = incomingEvent("message",message, origin, user)
+				targetService.on_incoming(event)
+		else:
+			print(" SERVICE NOT FOUND")
+			print(" SERVICE NOT FOUND")
+			print(" SERVICE NOT FOUND")
+			print(" SERVICE NOT FOUND")
+			print(" SERVICE NOT FOUND")
+			print(" SERVICE NOT FOUND")
+			print(" SERVICE NOT FOUND")
 
 
 	data = {}
 	if message:
 		print(message["data"]["chat"]["id"], a, kw)
 		print(":::::::::::::::::")
-		pp(message)
+		# pp(message)
 		data["origin"] = message["data"]["chatId"]
 		data["sender"] = message["data"]["from"]
 		data["type"] = message["data"]["type"]  # "chat" or "poll_creation" or
@@ -1232,7 +959,7 @@ def manage_incoming(message, *a, **kw):
 
 		origin = message["data"]["chat"]["id"]
 		print(f" incoming ::: {a} {kw} \n",
-                    user, origin, "\n", body, "\n")
+					user, origin, "\n", body, "\n")
 		useEcho = True
 		useEcho = False
 
@@ -1287,6 +1014,46 @@ water.ManageIncoming = manage_incoming
 # water.groups["origin_uid"].service.api = water.services.warmWinters.api
 
 # water.users
+
+
+def main():
+
+	# These are available:
+	# water.logs.info('::: Starting simple Service on port')
+	number = '972547932000@c.us'
+	# secure = "0B2FDC9C-FADF48A9-92E5F3D1-D2CDA55A"
+	# secure = "secure_api_key"
+	_client = SocketClient(f'http://{host}:{port}/', wa_key)
+	water._driver = _client
+	print("!!!!!!!!!!!!!!!!!", "_driver" in water, water._driver)
+
+	def printResponse(message):
+		print(" incoming :::\n", message["data"]["body"], "\n")
+
+	# Listening for events
+	# water._driver.onMessage(printResponse)
+	# water._driver.onMessage(water.ManageIncoming)
+	water._driver.onAnyMessage(water.ManageIncoming)
+	water._driver.onPollVote(water.ManagePolls)
+	water._driver.onGlobalParticipantsChanged(water.ParticipantChanged)
+	water._driver.onReaction(water.ParticipantChanged)
+
+
+	# Executing commands
+	water._driver.sendText(number, "fresh waters!!!!!!")
+
+	# Sync/Async support
+	print(" ::: CONNECTED! ", water._driver.getHostNumber())  # Sync request
+	loadServices(water)
+	# appServices = loadServices(water)
+
+	# water._driver.sendAudio(NUMBER,
+	# 				"https://download.samplelib.com/mp3/sample-3s.mp3",
+	# 				sync=False,
+	# 				callback=printResponse)  # Async request. Callback is optional
+
+	# Finally disconnect
+	# client.disconnect()
 
 if __name__ == "__main__":
 	main()
@@ -1365,3 +1132,16 @@ if __name__ == "__main__":
 # Text To Image
 # payment request
 # 
+
+
+
+
+# upnext:
+# - finalise the rolling groups
+# - open links to rolling groups with context - imitate using local links
+# - /shop shopid shop-title override
+# - change name and icon of rolling groups
+# - /shop with image and description
+
+
+# - auto join group on invite link from admin user (burn numbers to create groups without overlimiting the main number)

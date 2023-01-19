@@ -38,19 +38,101 @@ class WaterAPI():
 	def sendQuestion(self, question, callback = None, filter=None, filterResponse=None , *args, **kwargs):
 		print(" ::::::::: SENDING Question API ::::::::::::",question, callback , filter, filterResponse, args, kwargs)
 		
-class someService(object):
-	name="someService"
-	title = " ::: Some Service :::"
+# class someService(object):
+# 	name="someService"
+# 	title = " ::: Some Service :::"
+# 	iconURL = ""
+# 	_api = None
+# 	state = {} # use xo.redis ?
+
+# 	def __init__(self, api:WaterAPI,*args,**kwargs):
+# 		self._api = api
+		
+# 	def on_incoming(self, *args, **kwargs):
+# 		# handle logic for new information
+# 		pass 
+# 	def on_init_group(self, *args, **kwargs):
+# 		# send welcome
+# 		pass
+
+# 	def live(self, *args, **kwargs):
+# 		pass 
+
+
+class WaterService(object):
+	# water = None
+	shared = None
+	name = "exampleService"
+	title = " ::: Example Service :::"
 	iconURL = ""
 	_api = None
-	state = {} # use xo.redis ?
+	state = {}  # use xo.redis ?
+	# api = None
+	# _water = "No change"
+	def setWater(self, water):
+		self.water = water
 
-	def __init__(self, api:WaterAPI,*args,**kwargs):
+	def __init__(self, water):
+		print("OOOOOOOOOOOOOOOOOOOOo")
+		self.water = water
+		print("OOOOOOOOOOOOOOOOOOOOo")
+		print("OOOOOOOOOOOOOOOOOOOOo")
+		if WaterService.shared is None:
+			WaterService.shared = self
+			WaterService.water = water
+			# if api is None:
+			api = WaterAPI(water._driver)
+			WaterService.api = api
+
+		print("OOOOOOOOOOOOOOOOOOOOo")
+		print("OOOOOOOOOOOOOOOOOOOOo")
+		print("OOOOOOOOOOOOOOOOOOOOo")
+		print("OOOOOOOOOOOOOOOOOOOOo")
+		print("OOOOOOOOOOOOOOOOOOOOo")
+		print("OOOOOOOOOOOOOOOOOOOOo")
+		print("OOOOOOOOOOOOOOOOOOOOo")
+		print("OOOOOOOOOOOOOOOOOOOOo")
+		print("OOOOOOOOOOOOOOOOOOOOo")
+		print("OOOOOOOOOOOOOOOOOOOOo")
+		print("OOOOOOOOOOOOOOOOOOOOo")
+		print("OOOOOOOOOOOOOOOOOOOOo")
+		print("OOOOOOOOOOOOOOOOOOOOo")
+		print("OOOOOOOOOOOOOOOOOOOOo")
+		print("OOOOOOOOOOOOOOOOOOOOo")
+		print("OOOOOOOOOOOOOOOOOOOOo")
+		print("OOOOOOOOOOOOOOOOOOOOo")
+		print("OOOOOOOOOOOOOOOOOOOOo")
+		print("OOOOOOOOOOOOOOOOOOOOo")
+		print("OOOOOOOOOOOOOOOOOOOOo")
+		print("OOOOOOOOOOOOOOOOOOOOo")
+		print("OOOOOOOOOOOOOOOOOOOOo")
+		print("OOOOOOOOOOOOOOOOOOOOo")
+		print("OOOOOOOOOOOOOOOOOOOOo")
+		print("OOOOOOOOOOOOOOOOOOOOo")
+		print("OOOOOOOOOOOOOOOOOOOOo")
+		print("OOOOOOOOOOOOOOOOOOOOo")
+		print("OOOOOOOOOOOOOOOOOOOOo")
+		print("OOOOOOOOOOOOOOOOOOOOo")
+		print("OOOOOOOOOOOOOOOOOOOOo")
+		print("OOOOOOOOOOOOOOOOOOOOo")
+		print("OOOOOOOOOOOOOOOOOOOOo")
+		print("OOOOOOOOOOOOOOOOOOOOo")
+		print("OOOOOOOOOOOOOOOOOOOOo")
+		print("OOOOOOOOOOOOOOOOOOOOo")
+		print("OOOOOOOOOOOOOOOOOOOOo")
+		print("OOOOOOOOOOOOOOOOOOOOo")
+		print("OOOOOOOOOOOOOOOOOOOOo")
+		print("OOOOOOOOOOOOOOOOOOOOo",water)
+		self.water = water
 		self._api = api
-		
+
+	def __init__(self, api: WaterAPI, *args, **kwargs):
+		pass
+
 	def on_incoming(self, *args, **kwargs):
 		# handle logic for new information
-		pass 
+		pass
+
 	def on_init_group(self, *args, **kwargs):
 		# send welcome
 		pass

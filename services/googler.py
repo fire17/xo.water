@@ -1,8 +1,10 @@
 # from googlesearch.googlesearch import GoogleSearch
-from services.api import incomingEvent, poll, question, someService, WaterAPI
+# from services.api import incomingEvent, poll, question, someService, WaterAPI, WaterService
+from services.api import incomingEvent, poll, question, WaterAPI, WaterService
+# from wservices import 
 
 # class Googler(someService):
-class Googler(someService):
+class Googler(WaterService):
 	title = "Google"
 	name = "googler"
 	# iconURL = "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png"
