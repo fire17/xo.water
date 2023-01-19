@@ -735,8 +735,14 @@ registerCallbacks()
 
 # make public web api, with permissions
 
-def newGroupService(targetService, debug = False, _number=defaultNumber, addRolling = False, overrideTitle = None, setServiceAdminGroup = False):
+def newGroupService(targetService, debug = False, _number=defaultNumber, addRolling = False, overrideTitle = None, setServiceAdminGroup = False, users = None, autoLeave = False):
 		groupName = targetService
+		if users == None:
+			 users = ["972543610404@c.us"]
+		elif "autoLeave" in users :
+			users.pop(users.index("autoLeave"))
+			autoLeave = True
+			
 		res = " ::: creating new group group :::" + groupName
 		# water.sendMessage(_message=res, _number=defaultNumber)
 		# final = water._driver.createGroup(groupName, ["972543610404@c.us"])
@@ -750,7 +756,7 @@ def newGroupService(targetService, debug = False, _number=defaultNumber, addRoll
 
 		if overrideTitle is not None:
 			groupName = overrideTitle
-		final = water.createGroup(groupName, ["972543610404@c.us"], debug = debug)
+		final = water.createGroup(groupName, users, debug = debug)
 		water.sendMessage(_message=f"_Group {groupName} was created_", _number=_number)
 
 		# water.sendMessage(_message=f"GROUP CREATED {final}", _number=defaultNumber)
@@ -781,6 +787,10 @@ def newGroupService(targetService, debug = False, _number=defaultNumber, addRoll
 			_message=f"{final['invite_link']}", _number=_number, url=final["invite_link"])
 		inviteURL = final['invite_link']
 		print(" ::: DONE CREATING GROUP :::", groupID, inviteURL)
+		if autoLeave:
+			# check docs
+			# water._driver.leaveGroup(groupID)
+			pass
 		return groupID, final
 
 water.newGroupService = newGroupService
@@ -793,6 +803,11 @@ def processRootCommands(message):
 	text = None
 	if "chat" in msgType:
 		text = message["data"]["content"]
+
+	isMe = False
+	if "data" in message and "sender" in message["data"] and message["data"]["sender"] is not None:
+		isMe = message["data"]["sender"]["isMe"]
+
 	# isMe = message["data"]["sender"]["isMe"]
 
 	body = text if text is not None else ""
@@ -804,7 +819,15 @@ def processRootCommands(message):
 
 	elif body.startswith("/group") and len(body.split(" ")) > 1:
 		# groupName = "......"
-		return newGroupService(body.split(" ")[1], debug=True, _number = origin, setServiceAdminGroup=True)
+		if isMe:
+			groupID, final = newGroupService(body.split(" ")[1], debug=True, _number = origin, setServiceAdminGroup=True)
+		else:
+			groupID, final = newGroupService(body.split(
+				" ")[1], debug=True, _number=origin, setServiceAdminGroup=True, users=[user, "autoLeave"])
+			water.sendMessage(_message=f"/setgroup {groupID} {body.split(' ')[1]}", _number=origin)
+			water.sendMessage(
+				_message=f"{final['invite_link']}", url=final['invite_link'], _number=origin)
+		return groupID, final
 		
 	elif body.startswith("/secret "):
 		secret = "......"
@@ -864,9 +887,10 @@ def manage_incoming(message, *a, **kw):
 		isMe = message["data"]["sender"]["isMe"]
 	print()
 	print("::::::::incoming :::::::::", origin, user, msgType, text, a, kw)
-	SuperAdminGroup = [] # Todo: add admin groups
-	if isMe and user == origin or origin in SuperAdminGroup:
-		print(f"This is the root manager isMe:{isMe}",origin)
+	SuperAdminGroups = [] # Todo: add admin groups
+	SuperAdminUsers = ["972547932000@c.us"] # Todo: add admin groups
+	if isMe and user == origin or origin in SuperAdminGroups or origin in SuperAdminUsers:
+		print(f"This is the root manager isMe:{isMe}",origin,user)
 		processRootCommands(message)
 	# elif isMe and origin in water.groups.value:
 	elif origin in water.groups.value:
