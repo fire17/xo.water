@@ -11,7 +11,7 @@ import speech_recognition as sr
 recognizer = sr.Recognizer()
 
 
-def AnalyzeAudioFile(self, path, defLanguage = 'iw-IL'):
+def AnalyzeAudioFile(path, defLanguage = 'iw-IL'):
 	text = ""
 	try:
 		# audio.export(path, format="wav")
@@ -19,7 +19,8 @@ def AnalyzeAudioFile(self, path, defLanguage = 'iw-IL'):
 		# notSent = False
 		with sr.AudioFile(path) as source:
 			rec = recognizer.record(source)
-			text = recognizer.recognize_google(rec)
+			text = recognizer.recognize_google(rec, language = defLanguage)
+			# recognizer.recognize_google(rec, language = 'iw-IL')
 			# self.sendMessage(message.chat_id, "Got from Speech:\n*"+text+"*")
 	except:
 		traceback.print_exc()
