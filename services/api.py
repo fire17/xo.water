@@ -24,7 +24,6 @@ class WaterAPI():
 		print(" ::::::::: RESPONDING ? API ::::::::::::", *args, **kwargs)
 		
 	def send(self,origin, data, *args, **kwargs):
-
 		print(" ::::::::: SENDING SOMETHING API ::::::::::::",origin, data, args, kwargs)
 		if self._driver is not None:
 			self._driver.sendText(origin, "[Results]\n" + str(data) )
@@ -72,6 +71,9 @@ class WaterService(object):
 	def setWater(self, water):
 		self.water = water
 
+	def send(*a,**kw):
+		return self._api.send_message_with_thumbnail
+
 	def __init__(self, water):
 		print("OOOOOOOOOOOOOOOOOOOOo")
 		self.water = water
@@ -83,8 +85,10 @@ class WaterService(object):
 			# if api is None:
 			api = WaterAPI(water._driver)
 			WaterService.api = api
-
-		print("OOOOOOOOOOOOOOOOOOOOo")
+		else:
+			api = WaterService.shared.api
+			
+		print("OOOOOOOOOOOOOOOOOOOOo AAAAAAAAAAAAA",api)
 		print("OOOOOOOOOOOOOOOOOOOOo")
 		print("OOOOOOOOOOOOOOOOOOOOo")
 		print("OOOOOOOOOOOOOOOOOOOOo")
@@ -126,8 +130,8 @@ class WaterService(object):
 		self.water = water
 		self._api = api
 
-	def __init__(self, api: WaterAPI, *args, **kwargs):
-		pass
+	# def __init__(self, api: WaterAPI, *args, **kwargs):
+	# 	pass
 
 	def on_incoming(self, *args, **kwargs):
 		# handle logic for new information

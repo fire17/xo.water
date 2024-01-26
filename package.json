@@ -1,5 +1,7 @@
 {
   "dependencies": {
-    "@open-wa/wa-automate": "^4.54.6"
+    "@open-wa/wa-automate": "^4.67.0",
+    "winston": "^3.11.0",
+    "winston-transport": "^4.6.0"
   }
 }

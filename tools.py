@@ -6,7 +6,7 @@ import base64
 from pydub import AudioSegment
 import shazi
 # from munch import Munch
-
+from pprint import pprint as pp
 import speech_recognition as sr
 recognizer = sr.Recognizer()
 
@@ -27,7 +27,7 @@ def AnalyzeAudioFile(path, defLanguage = 'iw-IL'):
 		# notSent = True
 	return text
 	
-def AnalyzeAudio(message, factored = False):
+def AnalyzeAudio(message, factored = False, water=None):
 	if message is None:
 		return None
 	shortRec = 3.5
@@ -45,7 +45,7 @@ def AnalyzeAudio(message, factored = False):
 		print("JJJJJJJJJJJJ",origin,ok)
 		print()
 		# water._driver.sendMessage(origin, "_Analyzing Audio Please Wait..._")
-		water.sendMessage(_message="_Analyzing Audio Please Wait..._", _number=defaultNumber)
+		water.sendMessage(_message="_Analyzing Audio Please Wait..._", _number=origin)
 		jobj["clientUrl"] = jobj["deprecatedMms3Url"]
 
 		# ptt = water._driver.download_media(jobj)
@@ -99,7 +99,7 @@ def AnalyzeAudio(message, factored = False):
 				rec = recognizer.record(source)
 
 				text = recognizer.recognize_google(rec, language = 'iw-IL')
-				water.sendMessage(_message="Got from Speech:\n*"+text+"*", _number=defaultNumber)
+				water.sendMessage(_message="Got from Speech:\n*"+text+"*", _number=origin)
 
 				# water._driver.sendMessage(origin, "Got from Speech:\n*"+text+"*")
 		except:

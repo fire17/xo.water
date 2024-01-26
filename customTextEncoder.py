@@ -30,6 +30,7 @@ char1, char2 = "֫", "ֿ"
 char1, char2 = "֫", "ֹ"
 char1, char2 = "ֿ",  "ֹ"
 
+#char1, char2 = "ֿ֫", "ֹ"
 
 
 def makeSecret(text, one_char=char1, zero_char=char2):
@@ -119,7 +120,7 @@ if __name__ == "__main__":
     print(":::::::::::::::")
 
     encoded_secret_text = makeSecret(secret_text, char1, char2)
-    text = f"https://google.com/"+encoded_secret_text+"/ Some text after the secret."
+    text = f"https://google.com/"+encoded_secret_text+"Some text after the secret."
     print(text)
     recovered, _ = recoverSecret(text, char1, char2)
     print(recovered)  # Output: "This is a secret message."

@@ -8,6 +8,7 @@ from xo.redis import xoRedis, xo , Expando
 from customTextEncoder import *
 import emoji
 
+
 # Basic
 import time
 import os
@@ -20,6 +21,7 @@ from tokenize import group
 
 #Extra
 from pprint import pprint as pp
+from pprint import pformat as pf
 
 
 # from rich.prompt import Prompt
@@ -43,7 +45,11 @@ from pprint import pprint as pp
 cwd = os.path.dirname(os.path.abspath(__file__))
 print(" ::: cwd:", cwd)
 
-water = xoRedis('water')
+water = xoRedis('water', host="localhost", port=6379)
+# from xo import *
+
+
+
 appServices = None
 
 def getEnvKey(key="WA_KEY"):
@@ -96,8 +102,147 @@ def ParticipantChanged(data,*a,**kw):
 			print(" ::: Welcome New User ::: ", user)
 
 		# Give a second for the service to be ready for the group
-		time.sleep(3)
-		if origin and water.rollingGroups[origin].service() is not None:
+		# time.sleep(3)
+
+		timeout, serviceC = 30, 0
+		foundService, service = None, None
+		print("11111111111111110")
+		serviceName = None
+		while (origin not in water.groups.value):
+			serviceName = water.groups[origin].service.value
+			serviceC+=1
+			time.sleep(1)
+			print("AWAITING SERVICE Name....",serviceC)
+		print("1111111111111111",serviceName)
+		if origin in water.groups.value:
+			timeout, serviceC = 30, 0
+			serviceName = water.groups[origin].service.value
+			while (serviceName is None and serviceC<timeout):
+				serviceName = water.groups[origin].service.value
+				serviceC+=1
+				time.sleep(1)
+				print("AWAITING SERVICE name Final....",serviceC)
+			if serviceName != None:
+				print(" @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ ")
+				print(" @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ ")
+				print(f" @@@@@@@@ PARTICIPANT CHANGE IN SERVICE {serviceName} ")
+				print(" @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ ")
+				print(" @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ ")
+				foundService = serviceName
+				service = water.services[foundService]._service
+
+				print("S"*40)
+				pp(service)
+				print("S"*40)
+				# water.sendMessage(_message=f"_New USER Participant ADDED - Service: {foundService} User:{user}_ \n_new rolling group in the background {newGroupID} {newFinal['invite_link']}_", _number=origin)
+				water.sendMessage(_message=f"_New USER Participant ADDED - Service: {foundService} User:{user}_" , _number=origin)
+				water.sendMessage(_message=str(pf(service)), _number=origin)
+				if service.welcome and service.welcome != "":
+					water.sendMessage(_message=service.welcome, _number=origin)
+					# Kick or remove from rolling
+					if "throwAfterWelcome" in service.__dir__() and service.throwAfterWelcome and (False or True):
+						water.sendMessage(_message=f"*Thanks For Login using {service.title}*\n_DYNAMIC GOODBYE + SEND OAUTH BACK_", _number=origin)
+						time.sleep(5)
+						water._driver.removeParticipant(origin, user)
+					else:
+						print("O O O O O O O O O O O O O O O O O O O O O O","throwAfterWelcome" in service.__dir__() and service.throwAfterWelcome)
+						print("O O O O O O O O O O O O O O O O O O O O O O")
+						print("O O O O O O O O O O O O O O O O O O O O O O")
+						print("O O O O O O O O O O O O O O O O O O O O O O")
+						print("O O O O O O O O O O O O O O O O O O O O O O")
+						print("O O O O O O O O O O O O O O O O O O O O O O")
+						print("O O O O O O O O O O O O O O O O O O O O O O")
+						targetService = water.rollingGroups[origin].service()
+						print(" :::::::::::::: ENTERED ROLLING GROUP of ",foundService, targetService)
+						#remove from roling available (if not admin)
+						
+						# TODO: Change _number = origin to service.admingroup
+						if user != defaultNumber:
+							# water.rollingGroups[origin]._delete("service")
+							# water.rollingGroups._delete(origin)
+							######### water.rollingGroups.available[foundService] += [origin]
+
+							# av = water.rollingGroups.available
+							if water.rollingGroups.available[foundService].groups() == None:
+								water.rollingGroups.available[foundService].groups._setValue([])
+								print(" RRRRRRRRRRRRRR CLEARED ROLLING",foundService)
+							if water.rollingGroups.available[foundService].groups() is not None and origin in water.rollingGroups.available[foundService].groups():
+								water.rollingGroups.available[foundService].groups = water.rollingGroups.available[foundService].groups().remove(origin)
+								print(" RRRRRRRRRRRRRR REMOVED FROM ROLLING",foundService)
+							else:
+								print(" RRRRRRRRRRRRRR NOTTTTTT REMOVED FROM ROLLING",foundService)
+
+							#DO i NEED TO REMOVE LINK> NAH, its not accesible if the origin group isnt in groups
+								
+							########### water.temp.a = water.temp.a().remove(2)
+							#create new group
+							
+							# create new group in the stack
+							# TODO: check isMe istead of defaultNumber (change default number on connected)
+							#if user != defaultNumber:
+							print(f" ::: NEWWWWWWWW USER JOINED!!!!!!!!!!!! {user} ")
+							# TODO: Change _number = origin to service.admingroup
+							# thisGroupName = "Get current name"
+
+							#Remove this chat from available rolling groups / or kick out
+							#check if there are less availalbe rolling groups for this service then should
+							# create a new rolling group and add it to available rolling groups
+
+							
+							#add new group to rolling availalbe
+							newGroupID, newFinal = "FAILED", {'invite_link':"FAILED"}
+							try:
+								newGroupID, newFinal = newGroupService(foundService, debug=True, _number = origin, setServiceAdminGroup=True)
+							except:
+								print(f" FAILED CREATING GROUP ")
+								print(f" FAILED CREATING GROUP ")
+								print(f" FAILED CREATING GROUP ",foundService)
+								print("F F F F F F F F F F F F F F F F F F F F\n"*10)
+							# if isMe:
+								# groupID, final = newGroupService(body.split(" ")[1], debug=True, _number = origin, setServiceAdminGroup=True)
+							# else:
+							# 	groupID, final = newGroupService(body.split(
+							# 		" ")[1], debug=True, _number=origin, setServiceAdminGroup=True, users=[user, "autoLeave"])
+							# 	water.sendMessage(_message=f"/setgroup {groupID} {body.split(' ')[1]}", _number=origin)
+							# 	water.sendMessage(
+							# 		_message=f"{final['invite_link']}", url=final['invite_link'], _number=origin)
+							# return groupID, final
+							''' #PREV/OLD
+							thisGroupName = water.groups[origin].name
+							base64icon = water.groups[origin].base64icon
+							newGroupID, newFinal = newGroupService(targetService=targetService, debug=True, addRolling=True, _number = origin, overrideTitle = thisGroupName, overrideBase64Icon = base64icon)
+							water.sendMessage(
+								_message=f"_New USER Participant ADDED - Service: {targetService} User:{user}_ \n_new rolling group in the background {newGroupID} {newFinal['invite_link']}_", _number=origin)
+							'''
+							water.sendMessage(
+								_message=f"_New USER Participant ADDED - Service: {foundService} User:{user}_ \n_new rolling group in the background {newGroupID} {newFinal['invite_link']}_", _number=origin)
+							water.rollingGroups[newGroupID].service = foundService
+							if water.rollingGroups.available[foundService].groups() == None:
+								water.rollingGroups.available[foundService].groups = []
+							if newGroupID == 'FAILED':
+								print (" X F X F X F X F X F X F X ")
+								print (" X F X F X F X F X F X F X ")
+								print (" X F X F X F X F X F X F X ")
+								print (" X F X F X F X F X F X F X ")
+								print (" X F X F X F X F X F X F X ", newFinal)
+							else:
+								water.rollingGroups.available[foundService].groups += [newGroupID]
+								water.rollingGroups.available[foundService].groups[newGroupID].link = newFinal['invite_link']
+							print("O O O O O  !!!!!!!!!!!!!!!!!!!!  O O O O O O",newFinal['invite_link'])
+							print("O O O O O  !!!!!!!!!!!!!!!!!!!!  O O O O O O",newFinal['invite_link'])
+							print("O O O O O  !!!!!!!!!!!!!!!!!!!!  O O O O O O",newFinal['invite_link'])
+							print("O O O O O  !!!!!!!!!!!!!!!!!!!!  O O O O O O",newFinal['invite_link'])
+							print("O O O O O  !!!!!!!!!!!!!!!!!!!!  O O O O O O",newFinal['invite_link'])
+							print("O O O O O  !!!!!!!!!!!!!!!!!!!!  O O O O O O",newFinal['invite_link'])
+							print("O O O O O  !!!!!!!!!!!!!!!!!!!!  O O O O O O",newFinal['invite_link'])
+							print("O O O O O  !!!!!!!!!!!!!!!!!!!!  O O O O O O",newFinal['invite_link'])
+							print("O O O O O  !!!!!!!!!!!!!!!!!!!!  O O O O O O",water.rollingGroups.available[foundService].groups[newGroupID].link())
+							print("O O O O O  !!!!!!!!!!!!!!!!!!!!  O O O O O O",water.rollingGroups.available[foundService].groups[newGroupID].link())
+							print("O O O O O  !!!!!!!!!!!!!!!!!!!!  O O O O O O",water.rollingGroups.available[foundService].groups[newGroupID].link())
+							print("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
+
+
+		if origin and water.rollingGroups[origin].service() is not None and False:
 		# if origin in water.rollingGroups.value:
 			print("O O O O O O O O O O O O O O O O O O O O O O")
 			print("O O O O O O O O O O O O O O O O O O O O O O")
@@ -128,6 +273,12 @@ def ParticipantChanged(data,*a,**kw):
 				print(f" ::: NEWWWWWWWW USER JOINED!!!!!!!!!!!! {user} ")
 				# TODO: Change _number = origin to service.admingroup
 				# thisGroupName = "Get current name"
+
+				#Remove this chat from available rolling groups / or kick out
+				#check if there are less availalbe rolling groups for this service then should
+				# create a new rolling group and add it to available rolling groups
+
+
 				thisGroupName = water.groups[origin].name
 				base64icon = water.groups[origin].base64icon
 				newGroupID, newFinal = newGroupService(targetService=targetService, debug=True, addRolling=True, _number = origin, overrideTitle = thisGroupName, overrideBase64Icon = base64icon)
@@ -138,8 +289,19 @@ def ParticipantChanged(data,*a,**kw):
 				water.sendMessage(
 					_message=f"_Admin Participant Changed - Service: {targetService}_", _number=origin)
 		else:
-			print(" ::: No Service ::: ", origin)
-			print(" ::: Rolling Groups ::: ", water.rollingGroups.value)
+			print(" ::: Service ::: ", origin, foundService, service)
+		
+		# TODO: Change _number = origin to service.admingroup
+		if user == defaultNumber:
+			#TODO: ADD TO ROLLING
+			print(" ::: ADMIN FIRST TIME IN GROUP ::: ",foundService)
+			water.rollingGroups[origin].service = foundService
+			if water.rollingGroups.available[foundService].groups() == None:
+				water.rollingGroups.available[foundService].groups._setValue([])
+			water.rollingGroups.available[foundService].groups += [origin]
+			#TODO: Set chat in available
+
+			print(" ::: Rolling Groups ::: ", origin in water.rollingGroups, water.rollingGroups)
 		# water.Simple.send(number=user, msg="Welcome to the group!")
 	# PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP
 	# ::::::::::::::::: ()
@@ -173,6 +335,7 @@ water.ManagePolls = manage_polls
 
 
 def send(self, chatID, content, thumbnail = None, service = "test", autoPreview = False):
+	print("SSSSSSSSSSSSSSSSSS sending", chatID, content, autoPreview)
 	if autoPreview and "http" in content:
 		if thumbnail is None or "dict" not in type(thumbnail) or len(thumnbnail)==0:
 			thumbnail = {}
@@ -282,6 +445,7 @@ def sendMessage(_message="fresh grass", _number="972547932000@c.us", url = None,
 			# water._driver.sendLinkWithAutoPreview(number, url, text = message)
 			water._driver.sendLinkWithAutoPreview(number, url, message)
 		else:
+			print("FFFFFFFFFFFFFF",number, "OOOOOOOOOOOO",message)
 			water._driver.sendText(number, message)
 		print(f" Message Sent ::: {a} {kw} \n", payload, "\n")
 	else:
@@ -319,7 +483,7 @@ from services.api import *
 def loadGroups():
 	groups = water.groups()
 	if groups == None:
-		water.groups = []
+		water.groups._setValue([])
 		groups = water.groups()
 	for group in groups:
 		water.groups[group]()
@@ -479,13 +643,24 @@ def createGroup(Name=" ::: Test ::: ", participants=["972543610404@c.us"], debug
 	print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
 	print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
 	print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
-	print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
-	try:
-		res["invite_link"] = water._driver.getGroupInviteLink(
-			res["wid"]["_serialized"])
-	except:
-		print(" ::: invite_link failed :::")
-		traceback.print_exc()
+	print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",res["wid"]["_serialized"])
+	foundInvite, inviteCount, maxCount = False,0,10
+	while not foundInvite and inviteCount < maxCount:
+		inviteCount += 1
+		try:
+			res["invite_link"] = water._driver.getGroupInviteLink(res["wid"]["_serialized"])
+			if "error" not in res["invite_link"]:
+				foundInvite = True
+			else:
+				print("i x i x i x i x i x i x i x i x i ")
+				print("i x i x i x i x i x i x i x i x i ")
+				print("i x i x i x i x i x i x i x i x i ")
+				print("i x i x i x i x i x i x i x i x i ")
+				print("i x i x i x i x i x i x i x i x i ")
+				print("i x i x i x i x i x i x i x i x i ")
+		except:
+			print(" ::: invite_link failed :::",inviteCount)
+			traceback.print_exc()
 
 	print("invite link: ", res["invite_link"])
 	try:
@@ -735,15 +910,15 @@ registerCallbacks()
 
 # make public web api, with permissions
 
-def newGroupService(targetService, debug = False, _number=defaultNumber, addRolling = False, overrideTitle = None, setServiceAdminGroup = False, users = None, autoLeave = False):
+def newGroupService(targetService, debug = False, _number=defaultNumber, addRolling = False, overrideTitle = None, setServiceAdminGroup = False, users = None, autoLeave = False, overrideIconURL = None, overrideBase64Icon = None):
 		groupName = targetService
 		if users == None:
-			 users = ["972543610404@c.us"]
+			users = ["972543610404@c.us"]
 		elif "autoLeave" in users :
 			users.pop(users.index("autoLeave"))
 			autoLeave = True
 			
-		res = " ::: creating new group group :::" + groupName
+		res = " ::: creating new group :::" + groupName
 		# water.sendMessage(_message=res, _number=defaultNumber)
 		# final = water._driver.createGroup(groupName, ["972543610404@c.us"])
 		# targetService = None
@@ -757,11 +932,15 @@ def newGroupService(targetService, debug = False, _number=defaultNumber, addRoll
 		if overrideTitle is not None:
 			groupName = overrideTitle
 		final = water.createGroup(groupName, users, debug = debug)
+		
+		groupID = final["wid"]["_serialized"]
+
+		water.groups[groupID].service = targetService
 		water.sendMessage(_message=f"_Group {groupName} was created_", _number=_number)
 
 		# water.sendMessage(_message=f"GROUP CREATED {final}", _number=defaultNumber)
-		print("....................")
-		print("....................")
+		print("....................",water.groups[groupID].service)
+		print("....................",targetService)
 		print("....................")
 		print("....................")
 		print("....................")
@@ -771,22 +950,23 @@ def newGroupService(targetService, debug = False, _number=defaultNumber, addRoll
 		print("....................")
 		print("....................")
 		print("....................")
-		groupID = final["wid"]["_serialized"]
 
 		if serviceObject is not None:
 			if addRolling:
 				if water.rollingGroups() == None:
-					water.rollingGroups = []
+					water.rollingGroups._setValue([])
 				water.rollingGroups += [groupID]
 				water.rollingGroups[groupID].service = targetService
 
 			setGroupToService(groupID, targetService,
-			                  setServiceAdminGroup=setServiceAdminGroup, groupName = groupName)
+							  setServiceAdminGroup=setServiceAdminGroup, groupName = groupName, overrideIconURL = overrideIconURL, overrideBase64Icon = overrideBase64Icon)
 
 		water.sendMessage(
 			_message=f"{final['invite_link']}", _number=_number, url=final["invite_link"])
 		inviteURL = final['invite_link']
 		print(" ::: DONE CREATING GROUP :::", groupID, inviteURL)
+		water.groups[groupID].link = inviteURL
+
 		if autoLeave:
 			# check docs
 			# water._driver.leaveGroup(groupID)
@@ -882,11 +1062,15 @@ def manage_incoming(message, *a, **kw):
 	text = None
 	if "chat" in msgType:
 		text = message["data"]["content"]
+	if "text" in kw:
+		text = kw["text"]
+		message["data"]["body"] = text
+		message["data"]["content"] = text
 	isMe = False
 	if "data" in message and "sender" in message["data"] and message["data"]["sender"] is not None:
 		isMe = message["data"]["sender"]["isMe"]
 	print()
-	print("::::::::incoming :::::::::", origin, user, msgType, text, a, kw)
+	print("::::::::incoming :::::::::", origin, user, msgType, text, a, kw,'\n')#,message)
 	SuperAdminGroups = [] # Todo: add admin groups
 	SuperAdminUsers = ["972547932000@c.us"] # Todo: add admin groups
 	if isMe and user == origin or origin in SuperAdminGroups or origin in SuperAdminUsers:
@@ -908,7 +1092,7 @@ def manage_incoming(message, *a, **kw):
 		
 
 		# should pass message data to service 
-		if text and not text.startswith("["):
+		if text and not text.startswith("[") and not isMe:
 			# water.sendMessage(_message=f"[will be handled by {serviceName} service]", _number=origin)
 			targetService = water.services[serviceName]._service
 			event = incomingEvent("message",message, origin, user)
@@ -950,7 +1134,7 @@ def manage_incoming(message, *a, **kw):
 
 
 	data = {}
-	if message:
+	if message and text is None:
 		print(message["data"]["chat"]["id"], a, kw)
 		print(":::::::::::::::::")
 		# pp(message)
@@ -974,7 +1158,9 @@ def manage_incoming(message, *a, **kw):
 
 			# for k in message:
 			# 	print(k," ::: ", message[k])
-			mContent = AnalyzeAudio(message)#, factored=factored)
+			mContent = AnalyzeAudio(message, water=water)#, factored=factored)
+			print("TRANSCRIBED!!!!!!!! ",mContent)
+			return manage_incoming(message, text=mContent.strip("*").replace("\u200f",""), *a, **kw)
 	print(":::::::::::::::::")
 	if message:
 		body = "________________________empty body________________________"
@@ -1019,6 +1205,8 @@ def manage_incoming(message, *a, **kw):
 water.ManageIncoming = manage_incoming
 
 
+water.wa.send @= lambda *a, **kw: water.sendMessage(*a, **kw)
+
 
 	
 
@@ -1057,6 +1245,7 @@ def main():
 	# Listening for events
 	# water._driver.onMessage(printResponse)
 	# water._driver.onMessage(water.ManageIncoming)
+	# water._driver.onAnyMessage(print)
 	water._driver.onAnyMessage(water.ManageIncoming)
 	water._driver.onPollVote(water.ManagePolls)
 	water._driver.onGlobalParticipantsChanged(water.ParticipantChanged)
@@ -1078,6 +1267,8 @@ def main():
 
 	# Finally disconnect
 	# client.disconnect()
+	while(True):
+		time.sleep(1)
 
 if __name__ == "__main__":
 	main()

@@ -4,6 +4,8 @@ zeroless
 killport
 rich
 xo.redis
+flask-socketio
+flask-cors
 spotipy==2.16.1
 youtube-search==1.1.1
 lxml==4.6.2

@@ -2,6 +2,9 @@ from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit, send, join_room, leave_room
 from flask import Flask, render_template, redirect, request, jsonify, url_for, send_from_directory
 from xo import *
+from xo.redis import xoRedis
+water = xoRedis('water', host="localhost", port=6379)
+
 
 from pprint import pprint as pp
 # from flask_jwt_extended import decode_token
@@ -107,6 +110,7 @@ def all_routes(text):
 	print("all_routes")
 	print("all_routes")
 	print("all_routes", text)
+	
 	secret_wrapped, freeText = recoverSecret(text)
 	original_text = text
 	if secret_wrapped is not None:
@@ -127,7 +131,7 @@ def all_routes(text):
 			# 	final = jsonify({"result":res[0], "msg":res[1]}), 200
 		# return final[0], final[1]
 
-	print("!!!!!!!")
+	print("!!!!!!!",text)
 	final = jsonify({"msg": "HELLO WORLD :D"}), 200
 	# master = Master.shares[0]
 	# requestOrigin = {'ip': request.remote_addr, "location": getIpLocation(request.remote_addr)}
@@ -159,7 +163,8 @@ def all_routes(text):
 						# master.driver.sendMessageQuick(v,content)
 						return redirect("https://cdn0.iconfinder.com/data/icons/dashboard-vol-1-flat/48/Dashboard_Vol._1-16-512.png")
 			else:
-				xo.wa.send(number, content)
+				#xo.wa.send(number, content)
+				water.wa.send(content, number)
 				# master.sendMessage(number,content)
 				# master.driver.sendMessageQuick(number,content)
 				return redirect("https://cdn0.iconfinder.com/data/icons/dashboard-vol-1-flat/48/Dashboard_Vol._1-16-512.png")
@@ -217,8 +222,18 @@ def all_routes(text):
 			                "secret": str(secret_wrapped), "freeText": freeText}), 200
 			print("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFinal")
 			print("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFinal")
-			print("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFinal")
+			print("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFinal",service)
 			print("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFinal",final)
+			available = water.rollingGroups.available[service].groups()[-1]
+			# availableChat = water.rollingGroups.available[service].groups[available].link()
+			availableChat = water.groups[available].link()
+			print("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFinal group:",available," invite_link: ", availableChat)
+			#TODO: try to refetch invite url
+
+
+			if str(availableChat) == str(None):
+				return redirect("https://cdn0.iconfinder.com/data/icons/dashboard-vol-1-flat/48/Dashboard_Vol._1-18-512.png")
+			return redirect(availableChat)
 			return redirect("https://chat.whatsapp.com/DklS7L8EL9p043uEWzTPZ8")
 			return final[0], final[1], {'Content-Type': 'application/json'}
 			firstKey = list(master.db["availableChats"][service])[0]

@@ -1,5 +1,6 @@
 # from googlesearch.googlesearch import GoogleSearch
 # from services.api import incomingEvent, poll, question, someService, WaterAPI, WaterService
+from google_answers import google_answers
 from services.api import incomingEvent, poll, question, WaterAPI, WaterService
 # from wservices import 
 
@@ -12,8 +13,8 @@ class Googler(WaterService):
 	welcome = "Welcome to Google Service! \n any thing you send here will turn into a google search"
 	sessions = {}
 
-	def __init__(self, api: WaterAPI, *args, **kwargs):
-		self._api = api
+	# def __init__(self, api: WaterAPI, *args, **kwargs):
+	# 	self._api = api
 	
 	
 	def on_init_group(self, groupUID, *args, **kwargs ):
@@ -30,6 +31,7 @@ class Googler(WaterService):
 		# if data.eventType == "poll":
 		# print("!!!!!!!!!!!!!!!",data.data, args, kwargs)
 		print("!!!!!!!!!!!!!!!!!", data.origin,)
+		print("@@@@@@@@@@",data)
 		query = data.data["data"]["body"]
 		# self._api.send(data.origin, "https://www.google.com/search?q="+str(data.data))
 		max_results = 5
@@ -57,14 +59,30 @@ class Googler(WaterService):
 			if resC > max_results:
 				break
 
-		final = "[Search Results]\n"
+		final = ""
+
+		quick_answer = google_answers(query)
+
+		for key in quick_answer:
+			final += "*"+str(key).capitalize() + ":* " + str(quick_answer[key]) + "\n"
+
+		final += f"\n[Search Results: {query}]\n"
 		c = 1
 		for result in search_results:
 			final += str(c) + ". *" + result.title+"* "+" ".join(result.description.split(" ")[:maxWordsDesc])+"\n" + result.url + "\n"
 			c+=1
 
-		self._api.send(data.origin, str(final))
-		print("::::::::::::::::::::::::: DONE GOOGLER INCOMING")
+		
+
+		# self._api.send(data.origin, str(final))
+		print("::::::::::::::::::::::::: SEND GOOGLER INCOMING")
+		print("::::::::::::::::::::::::: SEND GOOGLER INCOMING")
+		print("::::::::::::::::::::::::: SEND GOOGLER INCOMING")
+		print("::::::::::::::::::::::::: SEND GOOGLER INCOMING")
+		# self._api._driver.sendText(data.origin, str(final))
+		# self._api._driver.sendText(data.origin, "0000000000000")
+		self.water.sendMessage( str(final) , data.origin)
+		# self.water.send(data.origin, "222222222")
 		print("::::::::::::::::::::::::: DONE GOOGLER INCOMING")
 		print("::::::::::::::::::::::::: DONE GOOGLER INCOMING")
 		print("::::::::::::::::::::::::: DONE GOOGLER INCOMING")
