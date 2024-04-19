@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Page</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h3>Welcome to <br>the Whatsapp Auth<br>Signup/Login Demo (OTP)</h3>
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#loginModal">
+            Sign In
+        </button>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loginModalLabel">Login</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="loginForm" method="post" action="{{ url_for('login') }}" target="minimalWindow">
+                    <!-- <form id="loginForm" method="post" action="{{ url_for('login') }}" target="_blank"> -->
+                        <div class="form-group">
+                            <label for="username">Username:</label>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                        </div>
+                        <div id="loading" style="display:none;">
+                            <img src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/0.16.1/images/loader-large.gif" alt="Loading">
+                            Please wait...
+                        </div>
+                        <button type="submit" class="btn btn-primary" id="loginBtn">Sign In</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.1/socket.io.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#loginBtn').on('click', function() {
+                $('#loading').show();
+            });
+
+            $('#loginForm').on('submit', function() {
+                // Check if the user is accessing from a mobile device
+                var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+                var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                if (isMobile) {
+                    // Listen for the 'login_success' event from the server
+                    socket.on('login_success', function() {
+                        console.log("222222222222222")
+                        // smallWindow.close();
+                        // Redirect to dashboard in the original page
+                        window.location.href = "{{ url_for('dashboard') }}";
+                    });
+                    // Open the login form in the same tab
+                    return true;
+                } else {
+                    var width = 400;
+                    var height = 470;
+                    var left = (screen.width - width) / 2;
+                    var top = (screen.height - height)*1.5 / 5;
+                    
+                    var smallWindow =window.open('', 'minimalWindow', 'width=' + width + ',height=' + height + ',left=' + left + ',top=' + top + ',toolbar=no,location=no,menubar=no,status=no,scrollbars=no,resizable=no');
+                    // var smallWindow = window.open("{{ url_for('auth') }}", '_blank');
+                    // var smallWindow = window.open("https://chat.whatsapp.com/JEFnj7I25kF1jnmUzzxDqP", '_blank');
+
+                    window.addEventListener('message', function(event) {
+                        console.log("1111111111111111111")
+                        if (event.data === 'loginSuccess') {
+                            // Post a message to the smallWindow to request closure
+                            smallWindow.postMessage('loginSuccess', '*');
+                            smallWindow.close();
+                            // Redirect to dashboard in the original page
+                            window.location.href = "{{ url_for('dashboard') }}";
+                        }
+                    });
+
+                    socket.on('login_success', function() {
+                        console.log("3333333333333333")
+                        smallWindow.postMessage('loginSuccess', '*');
+                        smallWindow.close();
+                        // Redirect to dashboard in the original page
+                        window.location.href = "{{ url_for('dashboard') }}";
+                    });
+                
+                }
+
+            });
+        });
+    </script>
+</body>
+</html>

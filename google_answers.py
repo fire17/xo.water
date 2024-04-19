@@ -1,13 +1,27 @@
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from bs4 import BeautifulSoup
-import requests
+
+
+
+
+# import regex as re
+
+strong = False
+if strong:
+    from selenium import webdriver
+    from selenium.webdriver.chrome.options import Options
+    from bs4 import BeautifulSoup
+    options = Options() 
+    options.add_argument("--headless")
+    driver = webdriver.Chrome(options=options)
+    # user_agent = driver.execute_script("return navigator.userAgent;")
+    # print("Current User-Agent:", user_agent)
+else:
+    import requests
 ### IMPORTS Done
-
-options = Options() 
-options.add_argument("--headless")
-
-driver = webdriver.Chrome(options=options)
+    headers = {
+        # 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36'
+        'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/122.0.6261.69 Safari/537.36'
+    }
+    driver = requests
 lang="en"
 
 import time
@@ -54,7 +68,29 @@ def find_stock(soup):
     return data
 
 def find_block_component(soup):
-    return {"quick_answer":soup.find('div', {'aria-level': '3', 'role': 'heading'}).parent.text.strip()}
+    # res = soup.find('div', {'aria-level': '3', 'role': 'heading'}).parent.text
+    def extract_text(element):
+        # Initialize res as an empty string
+        res = ""
+        # Loop over each child element
+        for child in element.children:
+            # Check if the child is a string (text node)
+            if isinstance(child, str):
+                # Append the text content to res, adding a space if res already has content
+                res += child.strip() + " "  # Add a space after each text content
+            else:
+                # If the child is not a string, recursively call extract_text to handle nested elements
+                res += extract_text(child) + " "  # Add a space after each nested element's text content
+
+        return res.strip()  # Strip() to remove any leading/trailing spaces
+
+    parent_element = soup.find('div', {'aria-level': '3', 'role': 'heading'}).parent
+    res = extract_text(parent_element)
+    if '°C °C  °F  °F' in res:
+        print("ooooooo:",res)
+        res = res.split("°C °C  °F  °F")[0].split(" ")[0] + "°C / " + res.split("°C °C  °F  °F")[0].split(" ")[1] + "°F,"+ res.split("°C °C  °F  °F")[1]
+        res = res.replace("% ","%, ")
+    return {"quick_answer":res}
     
 def find_time(soup):
     data = {}
@@ -702,12 +738,15 @@ def google_answers(q=None, lang='en', url=None, func=None, tests =None, retSuc=T
         url = 'https://google.com/search?q='+q.replace(" ","+")+str(f'&hl={lang}' if lang is not None else '')
     print(q if q else "", lang if lang else "", ":::", url)
     ### GET SOUP (selenium)
-    driver.get(url)
 
     # Wait for page to fully render
     #driver.implicitly_wait(.8)  
-
-    soup = BeautifulSoup(driver.page_source, 'html.parser')
+    if hasattr(driver, "page_source"):
+        driver.get(url)
+        soup = BeautifulSoup(driver.page_source, 'html.parser')
+    else:
+        res = requests.get(url, headers=headers)
+        soup = BeautifulSoup(res.text, 'html.parser')
     options = [find_time, get_weather_forcast, find_translation,find_stock, find_side, find_top, find_left_raw, find_block_component, find_left , find_wa_desc, find_extra,  ]    
     title = getTitle(soup)
     t = 0

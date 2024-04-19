@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Welcome {{ name }}</h1>
+        <h2>Thanks for loggin in using WhatsApp!</h2>
+        <p>User details: {{ user_details }} </p>
+        <p>JWT Token: {{ jwt_token }}</p>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.1/socket.io.js"></script>
+    <script>
+        // // Simulate successful login and send a message to the original page
+        // window.opener.postMessage('loginSuccess', '*');
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+        socket.on('user_details', function(data) {
+            console.log(data);
+            // Handle user details here
+        });
+    </script>
+</body>
+</html>

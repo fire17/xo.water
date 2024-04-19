@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login with WhatsApp</title>
+</head>
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.1/socket.io.js"></script>
+    <script>
+        window.addEventListener('message', function(event) {
+            console.log("1111111111111111111")
+            if (event.data === 'loginSuccess') {
+                // Post a message to the smallWindow to request closure
+                // smallWindow.postMessage('loginSuccess', '*');
+                window.close();
+                // Redirect to dashboard in the original page
+                // window.location.href = "{{ url_for('dashboard') }}";
+            }
+            alert(event.data)
+        });
+        // Simulate successful login and send a message to the original page
+        // window.opener.postMessage('loginSuccess', '*');    
+
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+        // Listen for the 'login_success' event from the server
+        socket.on('login_success', function() {
+            alert("success!!!!!!!!")
+            window.opener.postMessage('loginSuccess', '*');    
+            window.close()
+            // smallWindow.close();
+            // // Redirect to dashboard in the original page
+            // window.location.href = "{{ url_for('dashboard') }}";
+        });
+        window.location.href = "{{ wa_url }}";
+    </script>
+    <!-- <h2> Please Enter Whatsapp Auth to login </h2> -->
+    <!-- iframe to {{wa_url}} -->
+    <!-- <iframe src="{{wa_url}}" width="100%" height="100%" frameborder="0"></iframe> -->
+    
+    
+</body>
+</html>

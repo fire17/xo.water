@@ -10,7 +10,8 @@ class Auth(WaterService):
 	name = "auth"
 	# iconURL = "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png"
 	iconURL = "https://cdn.iconscout.com/icon/free/png-128/google-photos-square-3771029-3147646.png"
-	welcome = "Welcome to Auth Service! \n easy annonymous login"
+	# welcome = "Welcome to Auth Service! \n easy annonymous login"
+	welcome = "Thank you for using Auth Service! \n *You are now logged in* \n _Please return to the site_"
 	
 	throwAfterWelcome = True
 	

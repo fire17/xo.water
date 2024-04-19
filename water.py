@@ -135,14 +135,14 @@ def ParticipantChanged(data,*a,**kw):
 				pp(service)
 				print("S"*40)
 				# water.sendMessage(_message=f"_New USER Participant ADDED - Service: {foundService} User:{user}_ \n_new rolling group in the background {newGroupID} {newFinal['invite_link']}_", _number=origin)
-				water.sendMessage(_message=f"_New USER Participant ADDED - Service: {foundService} User:{user}_" , _number=origin)
-				water.sendMessage(_message=str(pf(service)), _number=origin)
+				# water.sendMessage(_message=f"_New USER Participant ADDED - Service: {foundService} User:{user}_" , _number=origin)
+				# water.sendMessage(_message=str(pf(service)), _number=origin)
 				if service.welcome and service.welcome != "":
 					water.sendMessage(_message=service.welcome, _number=origin)
 					# Kick or remove from rolling
 					if "throwAfterWelcome" in service.__dir__() and service.throwAfterWelcome and (False or True):
-						water.sendMessage(_message=f"*Thanks For Login using {service.title}*\n_DYNAMIC GOODBYE + SEND OAUTH BACK_", _number=origin)
-						time.sleep(5)
+						# water.sendMessage(_message=f"*Thanks For Login using {service.title}*\n_DYNAMIC GOODBYE + SEND OAUTH BACK_", _number=origin)
+						time.sleep(10)
 						water._driver.removeParticipant(origin, user)
 					else:
 						print("O O O O O O O O O O O O O O O O O O O O O O","throwAfterWelcome" in service.__dir__() and service.throwAfterWelcome)
